@@ -20,26 +20,26 @@ ${MIKE} delete --all ${EN_OPTIONS}
 ${MIKE} deploy master ${LATEST_VERSION} -u ${EN_OPTIONS}
 ${MIKE} set-default ${LATEST_VERSION} ${EN_OPTIONS}
 
-# v0.4.0
-VERSION="v0.4.0"
-cd .. && git checkout ${VERSION}
-cd cn
-${MIKE} deploy ${VERSION} -u ${CN_OPTIONS}
-cd ../en
-${MIKE} deploy ${VERSION} -u ${EN_OPTIONS}
+# # v0.4.0
+# VERSION="v0.4.0"
+# cd .. && git checkout ${VERSION}
+# cd cn
+# ${MIKE} deploy ${VERSION} -u ${CN_OPTIONS}
+# cd ../en
+# ${MIKE} deploy ${VERSION} -u ${EN_OPTIONS}
 
-# v0.7.0
-VERSION="v0.7.0"
-cd .. && git checkout ${VERSION}
-cd cn
-${MIKE} deploy ${VERSION} -u ${CN_OPTIONS}
-cd ../en
-${MIKE} deploy ${VERSION} -u ${EN_OPTIONS}
+# # v0.7.0
+# VERSION="v0.7.0"
+# cd .. && git checkout ${VERSION}
+# cd cn
+# ${MIKE} deploy ${VERSION} -u ${CN_OPTIONS}
+# cd ../en
+# ${MIKE} deploy ${VERSION} -u ${EN_OPTIONS}
 
-# v0.8.0
-VERSION="v0.8.0"
-cd .. && git checkout ${VERSION}
-cd cn
-${MIKE} deploy ${VERSION} -u ${CN_OPTIONS}
-cd ../en
-${MIKE} deploy ${VERSION} -u ${EN_OPTIONS}
+# # v0.8.0
+# VERSION="v0.8.0"
+# cd .. && git checkout ${VERSION}
+# cd cn
+# ${MIKE} deploy ${VERSION} -u ${CN_OPTIONS}
+# cd ../en
+# ${MIKE} deploy ${VERSION} -u ${EN_OPTIONS}
