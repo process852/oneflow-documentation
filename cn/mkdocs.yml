@@ -57,12 +57,12 @@ extra:
   alternate:
     #Switch to English
     - name: English
-      link: https://docs.oneflow.org/en
+      link: https://process852.github.io/oneflow-documentation/en/
       lang: en
 
     # Switch to Chinese
     - name: 中文
-      link: https://docs.oneflow.org
+      link: https://process852.github.io/oneflow-documentation/cn/
       lang: zh
 
   #disqus: livere_indeed
