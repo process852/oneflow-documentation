@@ -522,43 +522,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#debugging-in-graph-mode" class="md-nav__link">
-    Debugging in Graph Mode
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#save-and-load-graph-models" class="md-nav__link">
-    Save and Load Graph Models
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#graph-and-deployment" class="md-nav__link">
-    Graph and Deployment
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#further-reading-dynamic-graph-vs-static-graph" class="md-nav__link">
-    Further Reading: Dynamic Graph vs. Static Graph
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-links" class="md-nav__link">
-    Related Links
-  </a>
   
 </li>
       
@@ -955,43 +920,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#debugging-in-graph-mode" class="md-nav__link">
-    Debugging in Graph Mode
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#save-and-load-graph-models" class="md-nav__link">
-    Save and Load Graph Models
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#graph-and-deployment" class="md-nav__link">
-    Graph and Deployment
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#further-reading-dynamic-graph-vs-static-graph" class="md-nav__link">
-    Further Reading: Dynamic Graph vs. Static Graph
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#related-links" class="md-nav__link">
-    Related Links
-  </a>
   
 </li>
       
@@ -1021,90 +951,82 @@
 <p>The following script uses data set CIFAR10 to train model <code>mobilenet_v2</code>.</p>
 <details class="code">
 <summary>Code</summary>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">flowvision</span>
-<span class="kn">import</span> <span class="nn">flowvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn
+import flowvision
+import flowvision.transforms as transforms</p>
+<p>BATCH_SIZE=64
+EPOCH_NUM = 1</p>
+<p>DEVICE = "cuda" if flow.cuda.is_available() else "cpu"
+print("Using {} device".format(DEVICE))</p>
+<p>training_data = flowvision.datasets.CIFAR10(
+    root="data",
+    train=True,
+    transform=transforms.ToTensor(),
+    download=True,
+    source_url="<a href="https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/cifar/cifar-10-python.tar.gz">https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/cifar/cifar-10-python.tar.gz</a>",
+)</p>
+<p>train_dataloader = flow.utils.data.DataLoader(
+    training_data, BATCH_SIZE, shuffle=True
+)</p>
+<p>model = flowvision.models.mobilenet_v2().to(DEVICE)
+model.classifer = nn.Sequential(nn.Dropout(0.2), nn.Linear(model.last_channel, 10))
+model.train()</p>
+<p>loss_fn = nn.CrossEntropyLoss().to(DEVICE)
+optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)</p>
+<p>for t in range(EPOCH_NUM):
+    print(f"Epoch {t+1}\n-------------------------------")
+    size = len(train_dataloader.dataset)
+    for batch, (x, y) in enumerate(train_dataloader):
+        x = x.to(DEVICE)
+        y = y.to(DEVICE)</p>
+<div class="codehilite"><pre><span></span><code>    # Compute prediction error
+    pred = model(x)
+    loss = loss_fn(pred, y)
 
-<span class="n">BATCH_SIZE</span><span class="o">=</span><span class="mi">64</span>
-<span class="n">EPOCH_NUM</span> <span class="o">=</span> <span class="mi">1</span>
+    # Backpropagation
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
 
-<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using </span><span class="si">{}</span><span class="s2"> device&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">))</span>
-
-<span class="n">training_data</span> <span class="o">=</span> <span class="n">flowvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span>
-    <span class="n">root</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
-    <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
-    <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">source_url</span><span class="o">=</span><span class="s2">&quot;https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/cifar/cifar-10-python.tar.gz&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-    <span class="n">training_data</span><span class="p">,</span> <span class="n">BATCH_SIZE</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
-<span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">flowvision</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">mobilenet_v2</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">classifer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.2</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">last_channel</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-<span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-
-<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
-
-
-<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">EPOCH_NUM</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="se">\n</span><span class="s2">-------------------------------&quot;</span><span class="p">)</span>
-    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataloader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">batch</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-
-        <span class="c1"># Compute prediction error</span>
-        <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-        <span class="c1"># Backpropagation</span>
-        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
-        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-
-        <span class="n">current</span> <span class="o">=</span> <span class="n">batch</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span>
-        <span class="k">if</span> <span class="n">batch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">&gt;7f</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">current</span><span class="si">:</span><span class="s2">&gt;5d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">size</span><span class="si">:</span><span class="s2">&gt;5d</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+    current = batch * BATCH_SIZE
+    if batch % 5 == 0:
+        print(f&quot;loss: {loss:&gt;7f}  [{current:&gt;5d}/{size:&gt;5d}]&quot;)
 </code></pre></div>
+
+<p>```</p>
 </details>
 <p>Out:</p>
-<div class="highlight"><pre><span></span><code>loss: 6.921304  [    0/50000]
+<p><code>text
+loss: 6.921304  [    0/50000]
 loss: 6.824391  [  320/50000]
 loss: 6.688272  [  640/50000]
 loss: 6.644351  [  960/50000]
-...
-</code></pre></div>
+...</code></p>
 <h2 id="graph-mode-in-oneflow">Graph Mode in OneFlow<a class="headerlink" href="#graph-mode-in-oneflow" title="Permanent link">&para;</a></h2>
 <h3 id="customize-a-graph">Customize a Graph<a class="headerlink" href="#customize-a-graph" title="Permanent link">&para;</a></h3>
 <p>OneFlow provide the base class <a href="https://oneflow.readthedocs.io/en/v0.8.1/graph.html">nn.Graph</a>, which can be inherited to create a customized Graph class.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-
-<span class="k">class</span> <span class="nc">ModuleMyLinear</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">in_features</span><span class="p">,</span> <span class="n">out_features</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">out_features</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
-
-<span class="n">linear_model</span> <span class="o">=</span> <span class="n">ModuleMyLinear</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-
-<span class="k">class</span> <span class="nc">GraphMyLinear</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-  <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">linear_model</span>
-
-  <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn</p>
+<p>class ModuleMyLinear(nn.Module):
+    def <strong>init</strong>(self, in_features, out_features):
+        super().<strong>init</strong>()
+        self.weight = nn.Parameter(flow.randn(in_features, out_features))
+        self.bias = nn.Parameter(flow.randn(out_features))</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, input):
+    return flow.matmul(input, self.weight) + self.bias
 </code></pre></div>
+
+<p>linear_model = ModuleMyLinear(4, 3)</p>
+<p>class GraphMyLinear(nn.Graph):
+  def <strong>init</strong>(self):
+    super().<strong>init</strong>()
+    self.model = linear_model</p>
+<p>def build(self, input):
+    return self.model(input)
+```</p>
 <p>The simple example above contains the important steps needed to customize a Graph:</p>
 <ul>
 <li>Inherits <code>nn.Graph</code>.</li>
@@ -1113,122 +1035,115 @@ loss: 6.644351  [  960/50000]
 <li>Describes the computational process in <code>build</code> method.</li>
 </ul>
 <p>You can then instantiate and call the Graph:</p>
-<div class="highlight"><pre><span></span><code><span class="n">graph_mylinear</span> <span class="o">=</span> <span class="n">GraphMyLinear</span><span class="p">()</span>
-<span class="nb">input</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-<span class="n">out</span> <span class="o">=</span> <span class="n">graph_mylinear</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+graph_mylinear = GraphMyLinear()
+input = flow.randn(1, 4)
+out = graph_mylinear(input)
+print(out)</code></p>
 <p>Out:</p>
-<div class="highlight"><pre><span></span><code>tensor([[-0.3298, -3.7907,  0.1661]], dtype=oneflow.float32)
-</code></pre></div>
+<p><code>text
+tensor([[-0.3298, -3.7907,  0.1661]], dtype=oneflow.float32)</code></p>
 <p>Note that Graph is similar to Module in that the object itself is callable and it is <strong>not recommended</strong> to explicitly call the <code>build</code> method. Graph can directly reuse a defined Module. Users can refer the content in <a href="04_build_network.html">Build Network</a> to build a neural network. Then, set Module as a member of Graph in <code>__init__</code>  of Graph.</p>
 <p>For example, use the <code>linear_model</code> above as the network structure:</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ModelGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">linear_model</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">loss</span>
-
-<span class="n">model_graph</span> <span class="o">=</span> <span class="n">ModelGraph</span><span class="p">()</span>
+<p>```python
+class ModelGraph(flow.nn.Graph):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.model = linear_model</p>
+<div class="codehilite"><pre><span></span><code>def build(self, x, y):
+    y_pred = self.model(x)
+    return loss
 </code></pre></div>
+
+<p>model_graph = ModelGraph()
+```</p>
 <p>The major difference between Module and Graph is that Graph uses <code>build</code> method rather than <code>forward</code> method to describe the computation process, because the build method can contain not only forward computation, but also setting <code>loss</code>, optimizer, etc. You will see an example of using Graph for training later.</p>
 <h3 id="inference-in-graph-mode">Inference in Graph Mode<a class="headerlink" href="#inference-in-graph-mode" title="Permanent link">&para;</a></h3>
 <p>The following example for inference in Graph Mode directly using the model, which we have already trained in Eager Mode at the beginning of this article.</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">GraphMobileNetV2</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-
-<span class="n">graph_mobile_net_v2</span> <span class="o">=</span> <span class="n">GraphMobileNetV2</span><span class="p">()</span>
-
-<span class="n">x</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">))</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">y_pred</span> <span class="o">=</span> <span class="n">graph_mobile_net_v2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<p>```python
+class GraphMobileNetV2(flow.nn.Graph):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.model = model</p>
+<div class="codehilite"><pre><span></span><code>def build(self, x):
+    return self.model(x)
 </code></pre></div>
+
+<p>graph_mobile_net_v2 = GraphMobileNetV2()</p>
+<p>x, _ = next(iter(train_dataloader))
+x = x.to(DEVICE)
+y_pred = graph_mobile_net_v2(x)
+```</p>
 <h3 id="training-in-graph-mode">Training in Graph Mode<a class="headerlink" href="#training-in-graph-mode" title="Permanent link">&para;</a></h3>
 <p>The Graph can be used for training. Click on the "Code" below to see the detailed code.</p>
 <details class="code">
 <summary>Code</summary>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">flowvision</span>
-<span class="kn">import</span> <span class="nn">flowvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
-
-<span class="n">BATCH_SIZE</span><span class="o">=</span><span class="mi">64</span>
-<span class="n">EPOCH_NUM</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using </span><span class="si">{}</span><span class="s2"> device&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">))</span>
-
-<span class="n">training_data</span> <span class="o">=</span> <span class="n">flowvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span>
-    <span class="n">root</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
-    <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
-    <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-    <span class="n">training_data</span><span class="p">,</span> <span class="n">BATCH_SIZE</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span>
-<span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">flowvision</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">mobilenet_v2</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">classifer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.2</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">last_channel</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-<span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-
-<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
-
-<span class="k">class</span> <span class="nc">GraphMobileNetV2</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">loss_fn</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">loss</span>
-
-
-<span class="n">graph_mobile_net_v2</span> <span class="o">=</span> <span class="n">GraphMobileNetV2</span><span class="p">()</span>
-<span class="c1"># graph_mobile_net_v2.debug()</span>
-
-<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">EPOCH_NUM</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="se">\n</span><span class="s2">-------------------------------&quot;</span><span class="p">)</span>
-    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataloader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">batch</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">graph_mobile_net_v2</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="n">batch</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span>
-        <span class="k">if</span> <span class="n">batch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">&gt;7f</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">current</span><span class="si">:</span><span class="s2">&gt;5d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">size</span><span class="si">:</span><span class="s2">&gt;5d</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn
+import flowvision
+import flowvision.transforms as transforms</p>
+<p>BATCH_SIZE=64
+EPOCH_NUM = 1</p>
+<p>DEVICE = "cuda" if flow.cuda.is_available() else "cpu"
+print("Using {} device".format(DEVICE))</p>
+<p>training_data = flowvision.datasets.CIFAR10(
+    root="data",
+    train=True,
+    transform=transforms.ToTensor(),
+    download=True,
+)</p>
+<p>train_dataloader = flow.utils.data.DataLoader(
+    training_data, BATCH_SIZE, shuffle=True, drop_last=True
+)</p>
+<p>model = flowvision.models.mobilenet_v2().to(DEVICE)
+model.classifer = nn.Sequential(nn.Dropout(0.2), nn.Linear(model.last_channel, 10))
+model.train()</p>
+<p>loss_fn = nn.CrossEntropyLoss().to(DEVICE)
+optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)</p>
+<p>class GraphMobileNetV2(flow.nn.Graph):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.model = model
+        self.loss_fn = loss_fn
+        self.add_optimizer(optimizer)</p>
+<div class="codehilite"><pre><span></span><code>def build(self, x, y):
+    y_pred = self.model(x)
+    loss = self.loss_fn(y_pred, y)
+    loss.backward()
+    return loss
 </code></pre></div>
+
+<p>graph_mobile_net_v2 = GraphMobileNetV2()</p>
+<h1 id="graph_mobile_net_v2debug">graph_mobile_net_v2.debug()<a class="headerlink" href="#graph_mobile_net_v2debug" title="Permanent link">&para;</a></h1>
+<p>for t in range(EPOCH_NUM):
+    print(f"Epoch {t+1}\n-------------------------------")
+    size = len(train_dataloader.dataset)
+    for batch, (x, y) in enumerate(train_dataloader):
+        x = x.to(DEVICE)
+        y = y.to(DEVICE)
+        loss = graph_mobile_net_v2(x, y)
+        current = batch * BATCH_SIZE
+        if batch % 5 == 0:
+            print(f"loss: {loss:&gt;7f}  [{current:&gt;5d}/{size:&gt;5d}]")
+```</p>
 </details>
 <p>Comparing to inference, there are only a few things that are unique to training:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Optimizer</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span> <span class="c1"># (1)</span>
-
-<span class="c1"># The MobileNetV2 Graph</span>
-<span class="k">class</span> <span class="nc">GraphMobileNetV2</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># ...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span> <span class="c1"># (2)</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="c1"># ...</span>
-        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span> <span class="c1"># (3)</span>
-        <span class="c1"># ...</span>
+<p>```python</p>
+<h1 id="optimizer">Optimizer<a class="headerlink" href="#optimizer" title="Permanent link">&para;</a></h1>
+<p>optimizer = flow.optim.SGD(model.parameters(), lr=1e-3) # (1)</p>
+<h1 id="the-mobilenetv2-graph">The MobileNetV2 Graph<a class="headerlink" href="#the-mobilenetv2-graph" title="Permanent link">&para;</a></h1>
+<p>class GraphMobileNetV2(flow.nn.Graph):
+    def <strong>init</strong>(self):
+        # ...
+        self.add_optimizer(optimizer) # (2)</p>
+<div class="codehilite"><pre><span></span><code>def build(self, x, y):
+    # ...
+    loss.backward() # (3)
+    # ...
 </code></pre></div>
+
+<p>```</p>
 <ol>
 <li>Constructing the optimizer object, which is same to the training in Eager Mode introduced in <a href="06_optimization.html#optimizer_1">Backpropagation and Optimizer</a>.</li>
 <li>Call <code>self.add_optimizer</code> in Graph's <code>__init__</code> method to add the optimizer object constructed in the previous step to the Graph.</li>
@@ -1236,18 +1151,19 @@ loss: 6.644351  [  960/50000]
 </ol>
 <h3 id="debugging-in-graph-mode">Debugging in Graph Mode<a class="headerlink" href="#debugging-in-graph-mode" title="Permanent link">&para;</a></h3>
 <p>There are two ways to show the debug information of the Graph at present. <strong>Firstly</strong> you can call <code>print</code> to print the Graph object, and show information about it.</p>
-<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">graph_mobile_net_v2</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+print(graph_mobile_net_v2)</code></p>
 <p>The output is slightly different depending on whether the Graph object <strong>has been called</strong>:</p>
 <p>If you use <code>print</code> <strong>before</strong> the Graph object is called, the output is information about the network structure.</p>
 <p>The output for <code>print</code> used before <code>graph_mobile_net_v2</code> is called is like this:</p>
-<div class="highlight"><pre><span></span><code>(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2): (
+<p><code>text
+(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2): (
   (CONFIG:config:GraphConfig(training=True, ))
   (MODULE:model:MobileNetV2()): (
     (MODULE:model.features:Sequential()): (
       (MODULE:model.features.0:ConvBNActivation()): (
         (MODULE:model.features.0.0:Conv2d(3, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)): (
-          (PARAMETER:model.features.0.0.weight:tensor(..., device=&#39;cuda:0&#39;, size=(32, 3, 3, 3), dtype=oneflow.float32,
+          (PARAMETER:model.features.0.0.weight:tensor(..., device='cuda:0', size=(32, 3, 3, 3), dtype=oneflow.float32,
                  requires_grad=True)): ()
         )
     ...
@@ -1260,44 +1176,43 @@ loss: 6.644351  [  960/50000]
     )
   )
   (MODULE:loss_fn:CrossEntropyLoss()): ()
-)
-</code></pre></div>
+)</code></p>
 <p>In the above debug information, it means that based on Sequential model, the network customizes structures such as <code>ConvBNActivation</code> ( Corresponds to the <code>MBConv</code> module ), convolutional layer( including detailed parameter information such as <code>channel</code>, <code>kernel_size</code> and <code>stride</code> ), <code>Dropout</code>  and fully connected layer.</p>
 <p>If you use <code>print</code> <strong>after</strong> the Graph object is called, in addition to the structure of the network, it will print inputs and outputs of the tensors, the output on the console is like this:</p>
-<div class="highlight"><pre><span></span><code>(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2): (
+<p><code>text
+(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2): (
   (CONFIG:config:GraphConfig(training=True, ))
-  (INPUT:_GraphMobileNetV2_0-input_0:tensor(..., device=&#39;cuda:0&#39;, size=(64, 3, 32, 32), dtype=oneflow.float32))
-  (INPUT:_GraphMobileNetV2_0-input_1:tensor(..., device=&#39;cuda:0&#39;, size=(64,), dtype=oneflow.int64))
+  (INPUT:_GraphMobileNetV2_0-input_0:tensor(..., device='cuda:0', size=(64, 3, 32, 32), dtype=oneflow.float32))
+  (INPUT:_GraphMobileNetV2_0-input_1:tensor(..., device='cuda:0', size=(64,), dtype=oneflow.int64))
   (MODULE:model:MobileNetV2()): (
-    (INPUT:_model-input_0:tensor(..., device=&#39;cuda:0&#39;, is_lazy=&#39;True&#39;, size=(64, 3, 32, 32),
+    (INPUT:_model-input_0:tensor(..., device='cuda:0', is_lazy='True', size=(64, 3, 32, 32),
            dtype=oneflow.float32))
     (MODULE:model.features:Sequential()): (
-      (INPUT:_model.features-input_0:tensor(..., device=&#39;cuda:0&#39;, is_lazy=&#39;True&#39;, size=(64, 3, 32, 32),
+      (INPUT:_model.features-input_0:tensor(..., device='cuda:0', is_lazy='True', size=(64, 3, 32, 32),
              dtype=oneflow.float32))
       (MODULE:model.features.0:ConvBNActivation()): (
-        (INPUT:_model.features.0-input_0:tensor(..., device=&#39;cuda:0&#39;, is_lazy=&#39;True&#39;, size=(64, 3, 32, 32),
+        (INPUT:_model.features.0-input_0:tensor(..., device='cuda:0', is_lazy='True', size=(64, 3, 32, 32),
                dtype=oneflow.float32))
         (MODULE:model.features.0.0:Conv2d(3, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)): (
-          (INPUT:_model.features.0.0-input_0:tensor(..., device=&#39;cuda:0&#39;, is_lazy=&#39;True&#39;, size=(64, 3, 32, 32),
+          (INPUT:_model.features.0.0-input_0:tensor(..., device='cuda:0', is_lazy='True', size=(64, 3, 32, 32),
                  dtype=oneflow.float32))
-          (PARAMETER:model.features.0.0.weight:tensor(..., device=&#39;cuda:0&#39;, size=(32, 3, 3, 3), dtype=oneflow.float32,
+          (PARAMETER:model.features.0.0.weight:tensor(..., device='cuda:0', size=(32, 3, 3, 3), dtype=oneflow.float32,
                  requires_grad=True)): ()
-          (OUTPUT:_model.features.0.0-output_0:tensor(..., device=&#39;cuda:0&#39;, is_lazy=&#39;True&#39;, size=(64, 32, 16, 16),
+          (OUTPUT:_model.features.0.0-output_0:tensor(..., device='cuda:0', is_lazy='True', size=(64, 32, 16, 16),
                  dtype=oneflow.float32))
         )
-    ...
-</code></pre></div>
+    ...</code></p>
 <p><strong>The second</strong> way is that by calling the <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.Graph.debug.html">debug</a> method of Graph objects, Graph’s debug mode is turned on.</p>
-<div class="highlight"><pre><span></span><code><span class="n">graph_mobile_net_v2</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">v_level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># The defalut of v_level is 0.</span>
-</code></pre></div>
+<p><code>python
+graph_mobile_net_v2.debug(v_level=1) # The defalut of v_level is 0.</code></p>
 <p>which can also be written in a simplified way:</p>
-<div class="highlight"><pre><span></span><code><span class="n">graph_mobile_net_v2</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+graph_mobile_net_v2.debug(1)</code></p>
 <p>OneFlow prints debug information when it compiles the computation graph. If the <code>graph_mobile_net_v2.debug()</code> is removed from the example code above, the output on the console is like this:</p>
-<div class="highlight"><pre><span></span><code>(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2) end building graph.
+<p><code>text
+(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2) end building graph.
 (GRAPH:GraphMobileNetV2_0:GraphMobileNetV2) start compiling plan and init graph runtime.
-(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2) end compiling plan and init graph rumtime.
-</code></pre></div>
+(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2) end compiling plan and init graph rumtime.</code></p>
 <p>The advantage of using <code>debug</code>  is that the debug information is composed and printed at the same time, which makes it easy to find the problem if there is any error in the graph building process.</p>
 <p>Use <code>v_level</code> to choose verbose debug info level, default level is 0, max level is 3. </p>
 <ul>
@@ -1354,32 +1269,32 @@ loss: 6.644351  [  960/50000]
 <p>Graph model objects have <code>state_dict</code> and <code>load_state_dict</code> interfaces that similar to Module. We can save and load graph models with <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.save.html">save</a> and <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.load.html">load</a>. This is similar to Eagar module introduced in <a href="07_model_load_save.html">Model Save and Load</a>. A little different from Eager mode is that when calling Graph's <code>state_dict</code> during training, in addition to the parameters of each layer of the internal Module, other states such as training iteration steps and optimizer parameters will also be obtained, so as to resume training later.</p>
 <p>For example, we hope to save the latest state after each epoch while training <code>graph_mobile_net_v2</code> above, we need to add the following code:</p>
 <p>Assume that we want to save into "GraphMobileNetV2" under current directory:</p>
-<div class="highlight"><pre><span></span><code><span class="n">CHECKPOINT_SAVE_DIR</span> <span class="o">=</span> <span class="s2">&quot;./GraphMobileNetV2&quot;</span>
-</code></pre></div>
+<p><code>python
+CHECKPOINT_SAVE_DIR = "./GraphMobileNetV2"</code></p>
 <p>Insert the following code at the completion of each epoch:
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">shutil</span>
-<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">CHECKPOINT_SAVE_DIR</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Clear previous state</span>
-<span class="n">flow</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph_mobile_net_v2</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">CHECKPOINT_SAVE_DIR</span><span class="p">)</span>
-</code></pre></div></p>
+<code>python
+import shutil
+shutil.rmtree(CHECKPOINT_SAVE_DIR, ignore_errors=True)  # Clear previous state
+flow.save(graph_mobile_net_v2.state_dict(), CHECKPOINT_SAVE_DIR)</code></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><strong>Don't</strong> save in the following way. Because Graph will process members when it is initialized, and <code>graph_mobile_net_v2.model</code> is actually no longer a Module type:</p>
-<div class="highlight"><pre><span></span><code>flow.save(graph_mobile_net_v2.model.state_dict(), CHECKPOINT_SAVE_DIR)  # it will report an error
-</code></pre></div>
+<p><code>text
+flow.save(graph_mobile_net_v2.model.state_dict(), CHECKPOINT_SAVE_DIR)  # it will report an error</code></p>
 </div>
 <p>When we need to restore the previously saved state:</p>
-<div class="highlight"><pre><span></span><code><span class="n">state_dict</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">CHECKPOINT_SAVE_DIR</span><span class="p">)</span>
-<span class="n">graph_mobile_net_v2</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">state_dict</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+state_dict = flow.load(CHECKPOINT_SAVE_DIR)
+graph_mobile_net_v2.load_state_dict(state_dict)</code></p>
 <h3 id="graph-and-deployment">Graph and Deployment<a class="headerlink" href="#graph-and-deployment" title="Permanent link">&para;</a></h3>
 <p>nn.Graph supports saving model parameters and computation graph at the same time, which can easily support model deployment.</p>
 <p>If there is a need for model deployment, the <code>Graph</code> object should be exported to the format required for deployment through the <code>oneflow.save</code> interface:</p>
-<div class="highlight"><pre><span></span><code><span class="n">MODEL_SAVE_DIR</span><span class="o">=</span><span class="s2">&quot;./mobile_net_v2_model&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">MODEL_SAVE_DIR</span><span class="p">):</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">MODEL_SAVE_DIR</span><span class="p">)</span>
-<span class="n">flow</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph_mobile_net_v2</span><span class="p">,</span> <span class="n">MODEL_SAVE_DIR</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+MODEL_SAVE_DIR="./mobile_net_v2_model"
+import os
+if not os.path.exists(MODEL_SAVE_DIR):
+    os.makedirs(MODEL_SAVE_DIR)
+flow.save(graph_mobile_net_v2, MODEL_SAVE_DIR)</code></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Note the difference from the previous section. <code>save</code> interface supports saving state_dict and  also Graph objects. When the Graph object is saved, the model parameters and computation graph will be saved at the same time to decouple from the model structure definition code.</p>
@@ -1387,33 +1302,32 @@ loss: 6.644351  [  960/50000]
 <p>In this way, both model parameters and computation graph required for deployment will be saved in the <code>./mobile_net_v2_model</code> directory. For detailed deployment process, refer to <a href="../cookies/serving.html">Model Deployment</a>.</p>
 <p>You must export the model via a Graph object to meet the format requirement for deployment. If it is a model trained in Eager mode (i.e. <code>nn.Module</code> object), you need to use <code>Graph</code> to encapsulate the Module and then export it.</p>
 <p>Next, we take the <code>neural_style_transfer</code> as an example in the flowvision repository to show how to encapsulate and export the <code>nn.Module</code> model.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">from</span> <span class="nn">flowvision.models.neural_style_transfer.stylenet</span> <span class="kn">import</span> <span class="n">neural_style_transfer</span>
-
-
-<span class="k">class</span> <span class="nc">MyGraph</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="nb">input</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">*</span><span class="nb">input</span><span class="p">)</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">fake_image</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">neural_style_transfer</span><span class="p">(</span><span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">MyGraph</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">graph</span><span class="p">(</span><span class="n">fake_image</span><span class="p">)</span>
-
-    <span class="n">MODEL_SAVE_DIR</span><span class="o">=</span><span class="s2">&quot;./neural_style_transfer_model&quot;</span>
-    <span class="kn">import</span> <span class="nn">os</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">MODEL_SAVE_DIR</span><span class="p">):</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">MODEL_SAVE_DIR</span><span class="p">)</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">MODEL_SAVE_DIR</span><span class="p">)</span>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn
+from flowvision.models.neural_style_transfer.stylenet import neural_style_transfer</p>
+<p>class MyGraph(nn.Graph):
+    def <strong>init</strong>(self, model):
+        super().<strong>init</strong>()
+        self.model = model</p>
+<div class="codehilite"><pre><span></span><code>def build(self, *input):
+    return self.model(*input)
 </code></pre></div>
+
+<p>if <strong>name</strong> == "<strong>main</strong>":
+    fake_image = flow.ones((1, 3, 256, 256))
+    model = neural_style_transfer(pretrained=True, progress=True)
+    model.eval()
+    graph = MyGraph(model)
+    out = graph(fake_image)</p>
+<div class="codehilite"><pre><span></span><code>MODEL_SAVE_DIR=&quot;./neural_style_transfer_model&quot;
+import os
+if not os.path.exists(MODEL_SAVE_DIR):
+    os.makedirs(MODEL_SAVE_DIR)
+flow.save(graph, MODEL_SAVE_DIR)
+</code></pre></div>
+
+<p>```</p>
 <p>The above code:</p>
 <ul>
 <li>Defines a <code>MyGraph</code> class, and simply encapsulates the <code>nn.Module</code> object (<code>return self.model(*input)</code>), which is only used to convert <code>nn.Module</code> into a <code>Graph</code> object</li>
@@ -1423,17 +1337,16 @@ loss: 6.644351  [  960/50000]
 </ul>
 <h2 id="further-reading-dynamic-graph-vs-static-graph">Further Reading: Dynamic Graph vs. Static Graph<a class="headerlink" href="#further-reading-dynamic-graph-vs-static-graph" title="Permanent link">&para;</a></h2>
 <p>User-defined neural networks, are transformed by deep learning frameworks into computation graphs, like the example in <a href="05_autograd.html">Autograd</a>:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">y_pred</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># the input</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">z</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
-
-<span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># the label</span>
-<span class="n">l</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-</code></pre></div>
+<p>```python
+def loss(y_pred, y):
+    return flow.sum(&frac12;*(y_pred-y)**2)</p>
+<p>x = flow.ones(1, 5)  # the input
+w = flow.randn(5, 3, requires_grad=True)
+b = flow.randn(1, 3, requires_grad=True)
+z = flow.matmul(x, w) + b</p>
+<p>y = flow.zeros(1, 3)  # the label
+l = loss(z,y)
+```</p>
 <p>The corresponding computation graph is:</p>
 <p><img alt="computation graph" src="imgs/compute_graph.png" /></p>
 <p><strong>Dynamic Graph</strong></p>

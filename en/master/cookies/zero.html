@@ -1009,9 +1009,9 @@ alt="Three Stages of ZeRO-DP Optimizations" width="75%">
 
 <h2 id="zero-usage-example">ZeRo Usage Example<a class="headerlink" href="#zero-usage-example" title="Permanent link">&para;</a></h2>
 <p>First, import OneFlow：
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">from</span> <span class="nn">oneflow</span> <span class="kn">import</span> <span class="n">nn</span>
-</code></pre></div></p>
+<code>python
+import oneflow as flow
+from oneflow import nn</code></p>
 <h3 id="definine-the-training-process-of-data-parallelism">Definine the Training Process of Data Parallelism<a class="headerlink" href="#definine-the-training-process-of-data-parallelism" title="Permanent link">&para;</a></h3>
 <p>We define a training process under a data parallellelism strategy, similar to that described in <a href="../parallelism/05_ddp.html#通过设置-sbp-做数据并行训练">Conduct data parallel training by setting SBP</a>.</p>
 <div class="admonition note">
@@ -1019,92 +1019,95 @@ alt="Three Stages of ZeRO-DP Optimizations" width="75%">
 <p>ZeRO can be applied for all the cases where data parallel groups exist. For example, in 2D/3D parallel, ZeRO can be turned on as long as there is a data parallel group.</p>
 </div>
 <p>After the definition, we will use placement, SBP, etc:
-<div class="highlight"><pre><span></span><code><span class="n">P</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">B</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
-<span class="n">S0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span>
-</code></pre></div></p>
+<code>python
+P = flow.placement("cuda", ranks=[0, 1])
+B = flow.sbp.broadcast
+S0 = flow.sbp.split(0)
+DEVICE = "cuda"</code></p>
 <p>For demonstration purposes, we define a simple model and broadcast it to the cluster:
-<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">),</span>
-                      <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
-                      <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">B</span><span class="p">)</span>
-
-<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
-</code></pre></div></p>
+```python
+model = nn.Sequential(nn.Linear(256, 128),
+                      nn.ReLU(),
+                      nn.Linear(128, 10))
+model = model.to(DEVICE)
+model.train()
+model = model.to_global(placement=P, sbp=B)</p>
+<p>loss_fn = nn.CrossEntropyLoss().to(DEVICE)
+optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)
+```</p>
 <p>ZeRO is set in the graph compiler of <a href="../basics/08_nn_graph.html">nn.Graph</a>, so the dynamic graph model needs to be converted to nn.Graph:</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CustomGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">loss_fn</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
+<p>```python
+class CustomGraph(flow.nn.Graph):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.model = model
+        self.loss_fn = loss_fn
+        self.add_optimizer(optimizer)</p>
+<div class="codehilite"><pre><span></span><code>    # TODO: Set ZeRO
 
-        <span class="c1"># TODO: Set ZeRO</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">preds</span>
+def build(self, x, y):
+    preds = self.model(x)
+    loss = self.loss_fn(preds, y)
+    loss.backward()
+    return preds
 </code></pre></div>
+
+<p>```</p>
 <p>Definine the Training Process</p>
-<div class="highlight"><pre><span></span><code><span class="n">graph_model</span> <span class="o">=</span> <span class="n">CustomGraph</span><span class="p">()</span>
-
-<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-    <span class="n">global_x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">S0</span><span class="p">)</span>
-    <span class="n">global_y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">S0</span><span class="p">)</span>
-
-    <span class="n">graph_model</span><span class="p">(</span><span class="n">global_x</span><span class="p">,</span> <span class="n">global_y</span><span class="p">)</span>
+<p>```python
+graph_model = CustomGraph()</p>
+<p>for _ in range(100):
+    x = flow.randn(128, 256).to(DEVICE)
+    y = flow.ones(128, 1, dtype=flow.int64).to(DEVICE)
+    global_x = x.to_global(placement=P, sbp=S0)
+    global_y = y.to_global(placement=P, sbp=S0)</p>
+<div class="codehilite"><pre><span></span><code>graph_model(global_x, global_y)
 </code></pre></div>
+
+<p>```</p>
 <p>Then start training through <a href="../parallelism/04_launch.html">launch Module</a> </p>
 <h3 id="enable-zero-in-nngraph">Enable ZeRO in nn.Graph<a class="headerlink" href="#enable-zero-in-nngraph" title="Permanent link">&para;</a></h3>
 <p>ZeRO can be enabled through the interface <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.graph.graph_config.GraphConfig.enable_zero.html#oneflow.nn.graph.graph_config.GraphConfig.enable_zero">config.set_zero_redundancy_optimizer_mode</a> .</p>
 <h4 id="enable-stage-1-of-zero">Enable Stage 1 of ZeRO<a class="headerlink" href="#enable-stage-1-of-zero" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CustomGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="o">...</span>
-        <span class="c1"># Enable stage 1 of ZeRO</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_zero</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="o">...</span>
-</code></pre></div>
+<p><code>python
+class CustomGraph(flow.nn.Graph):
+    def __init__(self):
+        super().__init__()
+        ...
+        # Enable stage 1 of ZeRO
+        self.config.enable_zero(True, stage=1)
+        ...</code></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>When using the model for continuous training and prediction: After the training is performed once, ZeRO will automatically change the SBP parameter of the model from Broadcast to Split; when performing prediction, Split will be used for automatic inference without configuring ZeRO.</p>
 </div>
 <h4 id="enable-stage-2-of-zero">Enable Stage 2 of ZeRO<a class="headerlink" href="#enable-stage-2-of-zero" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CustomGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="o">...</span>
-        <span class="c1"># Enable stage 2 of ZeRO</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_zero</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-        <span class="o">...</span>
-</code></pre></div>
+<p><code>python
+class CustomGraph(flow.nn.Graph):
+    def __init__(self):
+        super().__init__()
+        ...
+        # Enable stage 2 of ZeRO
+        self.config.enable_zero(True, stage=2)
+        ...</code></p>
 <p>Generally speaking, the optimization of stage 2 has large optimization of memory and small speed impact, so it is recommended to use stage 2 optimization. It can be enabled in a simpler way:</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CustomGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="o">...</span>
-        <span class="c1"># Enable stage 2 of ZeRO</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_zero</span><span class="p">()</span>
-        <span class="o">...</span>
-</code></pre></div>
+<p><code>python
+class CustomGraph(flow.nn.Graph):
+    def __init__(self):
+        super().__init__()
+        ...
+        # Enable stage 2 of ZeRO
+        self.config.enable_zero()
+        ...</code></p>
 <h4 id="enable-stage-3-of-zero">Enable Stage 3 of ZeRO<a class="headerlink" href="#enable-stage-3-of-zero" title="Permanent link">&para;</a></h4>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CustomGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="o">...</span>
-        <span class="c1"># Enable stage 3 of ZeRO</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_zero</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">stage</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-        <span class="o">...</span>
-</code></pre></div>
+<p><code>python
+class CustomGraph(flow.nn.Graph):
+    def __init__(self):
+        super().__init__()
+        ...
+        # Enable stage 3 of ZeRO
+        self.config.enable_zero(True, stage=3)
+        ...</code></p>
 <p>Although enabling the third stage can minimize the memory consumption, it will increase the communication cost which will bring lower speed.</p>
                 
               

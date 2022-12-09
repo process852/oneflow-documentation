@@ -683,22 +683,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#mixed-parallelism" class="md-nav__link">
-    Mixed Parallelism
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
-    Conclusion
-  </a>
   
 </li>
       
@@ -920,22 +906,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#mixed-parallelism" class="md-nav__link">
-    Mixed Parallelism
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
-    Conclusion
-  </a>
   
 </li>
       
@@ -973,13 +945,13 @@
 <p>In the remainder of this article, we will explain the differences between these parallelism strategies with matrix multiplication as an example and introduce how to implement these strategies using <code>Global Tensor</code>.</p>
 <p>Assuming that a certain layer in a neural network is dedicated to matrix multiplication, if the shape of the input <span class="arithmatex">\(x\)</span> is <span class="arithmatex">\(4\times5\)</span> and that of the model parameter <span class="arithmatex">\(w\)</span> is <span class="arithmatex">\(5\times8\)</span>, then the shape of the output will be <span class="arithmatex">\(4\times8\)</span>.</p>
 <p>Basic code: </p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
-<span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 8)</span>
-</code></pre></div>
+<p>```python
+import oneflow as flow</p>
+<p>x = flow.randn(4, 5)
+w = flow.randn(5, 8)
+out = flow.matmul(x, w)
+print(out.shape) # (4, 8)
+```</p>
 <p>Here is the illustration:</p>
 <p><img alt="matmul" src="../parallelism/imgs/matmul_logical.png" /></p>
 <p>In single-device training, the above computation will produce an output <span class="arithmatex">\(out\)</span>, which will be passed to the next layer. Eventually, we will get a <span class="arithmatex">\(loss\)</span>. Then, in backward propagation, we will get <span class="arithmatex">\(\frac{\partial loss}{\partial w}\)</span>, which will be used to update <span class="arithmatex">\(w\)</span>.</p>
@@ -988,16 +960,16 @@
 <p>In OneFlow’s unique Global Tensor, the distribution is implemented via <code>placement</code> and <code>sbp</code>. <code>placement</code> refers to the physical devices that the global tensor is distributed among, and <code>sbp</code> refers to the way that the global tensor is distributed. (For more information, please refer to <a href="https://docs.oneflow.org/en/master/cookies/global_tensor.html">Create a Global Tensor</a>)</p>
 <p>Take two-GPU parallelism as an example, the data parallelism program for the aforementioned matrix multiplication is as follows:</p>
 <p><strong>Note: If you don’t have multiple GPUs, you can simulate multi-device parallelism with CPUs via designating the <code>placement</code> as <code>type="cpu"</code>.</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-<span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 8)</span>
-</code></pre></div>
+<p><code>python
+import oneflow as flow
+placement = flow.placement(type="cuda", ranks=[0, 1])
+x = flow.randn(4, 5, placement=placement, sbp=flow.sbp.split(dim=0))
+w = flow.randn(5, 8, placement=placement, sbp=flow.sbp.broadcast)
+out = flow.matmul(x, w)
+print(out.shape) # (4, 8)</code></p>
 <p>Supposing that the above program is in a <code>test.py</code> script, unlike what we’ve mentioned in the previous article, here we utilize a OneFlow distribution tool and execute the following command to start the program in terminal: </p>
-<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">2</span> test.py
-</code></pre></div>
+<p><code>shell
+python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
 <p>Illustration of data parallelism:</p>
 <p><img alt="Data Paralelism" src="../parallelism/imgs/matmul_data_paralelism.png" /></p>
 <p>As can be seen, the design of global tensor makes it easy to modify the code for the above matrix multiplication. All you need to do is to: </p>
@@ -1010,17 +982,17 @@
 <p>When the neural network is extremely large, data parallelism can result in huge cost of gradient synchronization. This is when model parallelism comes in handy.</p>
 <p>In contrast with data parallelism, with model parallelism, you partition the model and feed different parts of the model to various devices. Each device processes the same whole data.</p>
 <p>Still, we take two-GPU parallelism as an example. The model parallelism program for the aforementioned matrix multiplication is as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-
-<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-<span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 8)</span>
-</code></pre></div>
+<p>```python
+import oneflow as flow</p>
+<p>placement = flow.placement(type="cuda", ranks=[0, 1])
+x = flow.randn(4, 5, placement=placement, sbp=flow.sbp.broadcast)
+w = flow.randn(5, 8, placement=placement, sbp=flow.sbp.split(dim=1))
+out = flow.matmul(x, w)
+print(out.shape) # (4, 8)
+```</p>
 <p>Supposing that the above program is in a <code>test.py</code> script, we execute the following command to start the program in terminal:</p>
-<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">2</span> test.py
-</code></pre></div>
+<p><code>shell
+python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
 <p>Illustration of model parallelism:</p>
 <p><img alt="Data Parallelism" src="../parallelism/imgs/matmul_model_paralelism.png" /></p>
 <p>Similarly, the modification is simple:</p>
@@ -1031,30 +1003,27 @@
 <h3 id="pipeline-parallelism">Pipeline Parallelism<a class="headerlink" href="#pipeline-parallelism" title="Permanent link">&para;</a></h3>
 <p>If the neural network is too large to be placed on one device, pipeline parallelism can help. Pipeline parallelism means to partition the neural network into stages and distribute the stages to various devices. The devices will execute their given stage in a pipeline fashion.</p>
 <p>For example, we build a two-stage program for two-GPU pipeline parallelism:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-
-<span class="n">P0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">P1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">BROADCAST</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
-
-<span class="c1"># Place the first stage of the model on GPU 0.           </span>
-<span class="n">w0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">BROADCAST</span><span class="p">)</span>  
-<span class="c1"># Place the second stage of the model on GPU 1.</span>
-<span class="n">w1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P1</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">BROADCAST</span><span class="p">)</span>
-
-<span class="c1"># Randomly generate data to be used as input. Note that the data for the first stage should be placed on GPU 0.</span>
-<span class="n">in_stage0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">BROADCAST</span><span class="p">)</span>
-<span class="n">out_stage0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">in_stage0</span><span class="p">,</span> <span class="n">w0</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">out_stage0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 8)</span>
-
-<span class="c1"># Place the data for the second stage on GPU 1 via to_global.</span>
-<span class="n">in_stage1</span> <span class="o">=</span> <span class="n">out_stage0</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P1</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">BROADCAST</span><span class="p">)</span>
-<span class="n">out_stage1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">in_stage1</span><span class="p">,</span> <span class="n">w1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">out_stage1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 3)</span>
-</code></pre></div>
+<p>```python
+import oneflow as flow</p>
+<p>P0 = flow.placement(type="cuda", ranks=[0])
+P1 = flow.placement(type="cuda", ranks=[1])
+BROADCAST = flow.sbp.broadcast</p>
+<h1 id="place-the-first-stage-of-the-model-on-gpu-0">Place the first stage of the model on GPU 0.<a class="headerlink" href="#place-the-first-stage-of-the-model-on-gpu-0" title="Permanent link">&para;</a></h1>
+<p>w0 = flow.randn(5, 8, placement=P0, sbp=BROADCAST)  </p>
+<h1 id="place-the-second-stage-of-the-model-on-gpu-1">Place the second stage of the model on GPU 1.<a class="headerlink" href="#place-the-second-stage-of-the-model-on-gpu-1" title="Permanent link">&para;</a></h1>
+<p>w1 = flow.randn(8, 3, placement=P1, sbp=BROADCAST)</p>
+<h1 id="randomly-generate-data-to-be-used-as-input-note-that-the-data-for-the-first-stage-should-be-placed-on-gpu-0">Randomly generate data to be used as input. Note that the data for the first stage should be placed on GPU 0.<a class="headerlink" href="#randomly-generate-data-to-be-used-as-input-note-that-the-data-for-the-first-stage-should-be-placed-on-gpu-0" title="Permanent link">&para;</a></h1>
+<p>in_stage0 = flow.randn(4, 5, placement=P0, sbp=BROADCAST)
+out_stage0 = flow.matmul(in_stage0, w0)
+print(out_stage0.shape) # (4, 8)</p>
+<h1 id="place-the-data-for-the-second-stage-on-gpu-1-via-to_global">Place the data for the second stage on GPU 1 via to_global.<a class="headerlink" href="#place-the-data-for-the-second-stage-on-gpu-1-via-to_global" title="Permanent link">&para;</a></h1>
+<p>in_stage1 = out_stage0.to_global(placement=P1, sbp=BROADCAST)
+out_stage1 = flow.matmul(in_stage1, w1)
+print(out_stage1.shape) # (4, 3)
+```</p>
 <p>Supposing that the above program is in a <code>test.py</code> script, we execute the following command to start the program in terminal:</p>
-<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">2</span> test.py
-</code></pre></div>
+<p><code>shell
+python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
 <p>In the above program, we simulate a two-stage neural network with matrix multiplication. Different from data parallelism and model parallelism, pipeline parallelism does not shard the data or the model, but place the two stages of the model on two devices for computation.</p>
 <p>Thanks to the neat design of global tensor, during the computation, all you need to do is adjusting the distribution strategy of the output data from the previous stage via <code>to_global(...)</code> so the data can be used as the input for the next stage.</p>
 <h3 id="mixed-parallelism">Mixed Parallelism<a class="headerlink" href="#mixed-parallelism" title="Permanent link">&para;</a></h3>
@@ -1071,108 +1040,105 @@
 <p><strong>Click</strong> <code>Eager</code> and <code>Graph</code> for the corresponding sample code </p>
 </div>
 <div class="tabbed-set" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><label for="__tabbed_1_1">Eager</label><div class="tabbed-content">
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-
-<span class="n">P01</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">P23</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-
-<span class="k">class</span> <span class="nc">StageModule</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dims</span><span class="p">,</span> <span class="n">out_dims</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
-            <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">in_dims</span><span class="p">,</span> <span class="n">out_dims</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">out</span>
-
-<span class="k">class</span> <span class="nc">ModuleModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
-        <span class="c1"># The first stage of the model: execute data parallelism on GPU 0 and 1.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span> <span class="o">=</span> <span class="n">StageModule</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-
-        <span class="c1"># The second stage of the model: execute model parallelism on GPU 2 and 3.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span> <span class="o">=</span> <span class="n">StageModule</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="c1"># First stage: the data is partitioned across GPU 0 and 1 for data parallelism.</span>
-        <span class="n">out_stage0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-        <span class="c1"># Second stage: stitch the data together and pass them to GPU 2 and 3 for model parallelism.</span>
-        <span class="n">in_stage1</span> <span class="o">=</span> <span class="n">out_stage0</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-        <span class="n">out_stage1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span><span class="p">(</span><span class="n">in_stage1</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">out_stage0</span><span class="p">,</span> <span class="n">out_stage1</span>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">ModuleModel</span><span class="p">()</span>
-    <span class="c1"># Partition the input data for data parallelism.</span>
-    <span class="n">in_stage0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-    <span class="n">out_stage0</span><span class="p">,</span> <span class="n">out_stage1</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">in_stage0</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">out_stage0</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">out_stage1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (4, 8) (4, 3)</span>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn</p>
+<p>P01 = flow.placement(type="cuda", ranks=[0, 1])
+P23 = flow.placement(type="cuda", ranks=[2, 3])</p>
+<p>class StageModule(nn.Module):
+    def <strong>init</strong>(self, in_dims, out_dims, placement=None, sbp=None):
+        super().<strong>init</strong>()
+        self.w = nn.Parameter(
+            flow.randn(in_dims, out_dims, placement=placement, sbp=sbp)
+        )</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    out = flow.matmul(x, self.w)
+    return out
 </code></pre></div>
+
+<p>class ModuleModel(nn.Module):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()</p>
+<div class="codehilite"><pre><span></span><code>    # The first stage of the model: execute data parallelism on GPU 0 and 1.
+    self.m_stage0 = StageModule(5, 8, placement=P01, sbp=flow.sbp.broadcast)
+
+    # The second stage of the model: execute model parallelism on GPU 2 and 3.
+    self.m_stage1 = StageModule(8, 3, placement=P23, sbp=flow.sbp.split(dim=1))
+
+def forward(self, x)
+    # First stage: the data is partitioned across GPU 0 and 1 for data parallelism.
+    out_stage0 = self.m_stage0(x)
+
+    # Second stage: stitch the data together and pass them to GPU 2 and 3 for model parallelism.
+    in_stage1 = out_stage0.to_global(placement=P23, sbp=flow.sbp.broadcast)
+    out_stage1 = self.m_stage1(in_stage1)
+
+    return out_stage0, out_stage1
+</code></pre></div>
+
+<p>if <strong>name</strong> == "<strong>main</strong>":
+    model = ModuleModel()
+    # Partition the input data for data parallelism.
+    in_stage0 = flow.randn(4, 5, placement=P01, sbp=flow.sbp.split(dim=0))
+    out_stage0, out_stage1 = model(in_stage0)
+    print(out_stage0.shape, out_stage1.shape)  # (4, 8) (4, 3)
+```</p>
 </div>
 <input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><label for="__tabbed_1_2">Graph</label><div class="tabbed-content">
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-
-<span class="n">P01</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">P23</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-
-<span class="k">class</span> <span class="nc">StageModule</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dims</span><span class="p">,</span> <span class="n">out_dims</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
-            <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">in_dims</span><span class="p">,</span> <span class="n">out_dims</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">out</span>
-
-<span class="k">class</span> <span class="nc">ModuleModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
-        <span class="c1"># The first stage of the model: execute data parallelism on GPU 0 and 1.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span> <span class="o">=</span> <span class="n">StageModule</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-
-        <span class="c1"># The second stage of the model: execute model parallelism on GPU 2 and 3.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span> <span class="o">=</span> <span class="n">StageModule</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-
-        <span class="c1"># First stage: the data is partitioned across GPU 0 and 1 for data parallelism.</span>
-        <span class="n">out_stage0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-        <span class="c1"># Second stage: stitch the data together and pass them to GPU 2 and 3 for model parallelism.</span>
-        <span class="n">in_stage1</span> <span class="o">=</span> <span class="n">out_stage0</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-        <span class="n">out_stage1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span><span class="p">(</span><span class="n">in_stage1</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">out_stage0</span><span class="p">,</span> <span class="n">out_stage1</span>
-
-<span class="c1"># Graph</span>
-<span class="k">class</span> <span class="nc">GraphModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">ModuleModel</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">m_stage0</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">set_stage</span><span class="p">(</span><span class="n">stage_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">m_stage1</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">set_stage</span><span class="p">(</span><span class="n">stage_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">GraphModel</span><span class="p">()</span>
-    <span class="c1"># Partition the input data for data parallelism.</span>
-    <span class="n">in_stage0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-    <span class="n">out_stage0</span><span class="p">,</span> <span class="n">out_stage1</span> <span class="o">=</span> <span class="n">graph</span><span class="p">(</span><span class="n">in_stage0</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">out_stage0</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">out_stage1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (4, 8) (4, 3)</span>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn</p>
+<p>P01 = flow.placement(type="cuda", ranks=[0, 1])
+P23 = flow.placement(type="cuda", ranks=[2, 3])</p>
+<p>class StageModule(nn.Module):
+    def <strong>init</strong>(self, in_dims, out_dims, placement=None, sbp=None):
+        super().<strong>init</strong>()
+        self.w = nn.Parameter(
+            flow.randn(in_dims, out_dims, placement=placement, sbp=sbp)
+        )</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    out = flow.matmul(x, self.w)
+    return out
 </code></pre></div>
+
+<p>class ModuleModel(nn.Module):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()</p>
+<div class="codehilite"><pre><span></span><code>    # The first stage of the model: execute data parallelism on GPU 0 and 1.
+    self.m_stage0 = StageModule(5, 8, placement=P01, sbp=flow.sbp.broadcast)
+
+    # The second stage of the model: execute model parallelism on GPU 2 and 3.
+    self.m_stage1 = StageModule(8, 3, placement=P23, sbp=flow.sbp.split(dim=1))
+def forward(self, x):
+
+    # First stage: the data is partitioned across GPU 0 and 1 for data parallelism.
+    out_stage0 = self.m_stage0(x)
+
+    # Second stage: stitch the data together and pass them to GPU 2 and 3 for model parallelism.
+    in_stage1 = out_stage0.to_global(placement=P23, sbp=flow.sbp.broadcast)
+    out_stage1 = self.m_stage1(in_stage1)
+
+    return out_stage0, out_stage1
+</code></pre></div>
+
+<h1 id="graph">Graph<a class="headerlink" href="#graph" title="Permanent link">&para;</a></h1>
+<p>class GraphModel(nn.Graph):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.model = ModuleModel()
+        self.model.m_stage0.to(nn.graph.GraphModule).set_stage(stage_id=0, placement=P01)
+        self.model.m_stage1.to(nn.graph.GraphModule).set_stage(stage_id=1, placement=P23)</p>
+<div class="codehilite"><pre><span></span><code>def build(self, x):
+    return self.model(x)
+</code></pre></div>
+
+<p>if <strong>name</strong> == "<strong>main</strong>":
+    graph = GraphModel()
+    # Partition the input data for data parallelism.
+    in_stage0 = flow.randn(4, 5, placement=P01, sbp=flow.sbp.split(dim=0))
+    out_stage0, out_stage1 = graph(in_stage0)
+    print(out_stage0.shape, out_stage1.shape)  # (4, 8) (4, 3)
+```</p>
 </div>
 </div>
 <p>The above programs construct a two-stage network, whose <code>two-device two-GPU</code> parallelism is illustrated as follows:</p>
@@ -1183,29 +1149,29 @@
 <ol>
 <li>
 <p>For a single-device 4-GPU environment, here is how it is started:</p>
-<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">4</span> test.py
-</code></pre></div>
+<p><code>shell
+python3 -m oneflow.distributed.launch --nproc_per_node 4 test.py</code></p>
 </li>
 <li>
 <p>The OneFlow distribution tool supports multi-device multi-GPU parallelism. For example, for a <code>two-device two-GPU</code> environment, here is how it is started:</p>
 <p>Execution on Machine 0:</p>
-<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch <span class="se">\</span>
-    --nnodes<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
-    --node_rank<span class="o">=</span><span class="m">0</span> <span class="se">\</span>
-    --nproc_per_node<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
-    --master_addr<span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span> <span class="se">\ </span><span class="c1"># IP of Machine 0</span>
-    --master_port<span class="o">=</span><span class="m">7788</span> <span class="se">\</span>
-    test.py
-</code></pre></div>
+<p><code>shell
+python3 -m oneflow.distributed.launch \
+    --nnodes=2 \
+    --node_rank=0 \
+    --nproc_per_node=2 \
+    --master_addr="192.168.1.1" \ # IP of Machine 0
+    --master_port=7788 \
+    test.py</code></p>
 <p>Execution on Machine 1:</p>
-<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch <span class="se">\</span>
-    --nnodes<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
-    --node_rank<span class="o">=</span><span class="m">1</span> <span class="se">\</span>
-    --nproc_per_node<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
-    --master_addr<span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span> <span class="se">\ </span><span class="c1"># IP of Machine 0</span>
-    --master_port<span class="o">=</span><span class="m">7788</span> <span class="se">\</span>
-    test.py
-</code></pre></div>
+<p><code>shell
+python3 -m oneflow.distributed.launch \
+    --nnodes=2 \
+    --node_rank=1 \
+    --nproc_per_node=2 \
+    --master_addr="192.168.1.1" \ # IP of Machine 0
+    --master_port=7788 \
+    test.py</code></p>
 <p>Note that <code>master_addr</code> should be set to the IP of Machine 0.</p>
 </li>
 </ol>

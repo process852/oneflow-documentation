@@ -791,36 +791,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    加载模型
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#state-dict-nnmodule" class="md-nav__link">
-    将 state dict 加载到 nn.Module 中
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    一个完整示例
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    结语
-  </a>
   
 </li>
       
@@ -946,36 +918,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    加载模型
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#state-dict-nnmodule" class="md-nav__link">
-    将 state dict 加载到 nn.Module 中
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
-    一个完整示例
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    结语
-  </a>
   
 </li>
       
@@ -1009,261 +953,254 @@
 <p>再回到我们关注的地方，这个接口如何做到模型分片保存和加载？比如对于模型并行/流水并行，模型的参数分散在多个 Rank 上，在保存模型前通过  <code>flow.utils.global_view.to_global()</code>  将 state dict 里的每个 Tensor 在指定 Placement 上转为 Global Tensor，SBP 的类型为  <code>flow.sbp.split</code>，可以设置在特定维度上的切分。同样的，模型也可以按 Split 被加载。当然，SBP 也可以为 broadcast，支持不同的 SBP 和 Placement 组合。这样，超大规模模型分片存储的问题就被非常好的解决了。</p>
 <h3 id="_2">保存模型<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <p>大致了解  <code>flow.utils.global_view.to_global()</code>  接口后，在这一部分演示了如何分片保存模型，代码如下：</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># 自定义 get_sbp 函数。</span>
-<span class="k">def</span> <span class="nf">get_sbp</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">tensor</span> <span class="ow">is</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;System-Train-TrainStep&quot;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
-    <span class="k">if</span> <span class="n">tensor</span> <span class="ow">is</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;module_pipeline&quot;</span><span class="p">][</span><span class="s2">&quot;m_stage3.linear.weight&quot;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">tensor</span> <span class="ow">is</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;module_pipeline&quot;</span><span class="p">][</span><span class="s2">&quot;m_stage3.linear.bias&quot;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
-    <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="n">model_file_state_dict</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">global_view</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span>
-    <span class="n">state_dict</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">model_file_placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">get_sbp</span><span class="p">,</span> 
-    <span class="p">)</span> <span class="c1"># 使用 sbp=get_sbp 处理特殊的键，也支持指定普通的 SBP。</span>
-
-<span class="n">rank_id</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
-<span class="c1"># 保存模型分片的路径，一个 rank 对应一个路径。</span>
-<span class="n">state_dict_dir</span> <span class="o">=</span> <span class="s2">&quot;./graph_save_load_global_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank_id</span><span class="p">)</span>
-
-<span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="ow">in</span> <span class="n">model_file_placement</span><span class="o">.</span><span class="n">ranks</span><span class="p">:</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-        <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">global_view</span><span class="o">.</span><span class="n">to_local</span><span class="p">(</span><span class="n">model_file_state_dict</span><span class="p">),</span>
-        <span class="n">state_dict_dir</span><span class="p">,</span>
-    <span class="p">)</span>
-</code></pre></div>
+<p>```python</p>
+<h1 id="get_sbp">自定义 get_sbp 函数。<a class="headerlink" href="#get_sbp" title="Permanent link">&para;</a></h1>
+<p>def get_sbp(state_dict, tensor):
+    if tensor is state_dict["System-Train-TrainStep"]:
+        return flow.sbp.broadcast
+    if tensor is state_dict["module_pipeline"]["m_stage3.linear.weight"]:
+        return flow.sbp.split(1)
+    if tensor is state_dict["module_pipeline"]["m_stage3.linear.bias"]:
+        return flow.sbp.broadcast
+    return flow.sbp.split(0)</p>
+<p>model_file_state_dict = flow.utils.global_view.to_global(
+    state_dict, placement=model_file_placement, sbp=get_sbp, 
+    ) # 使用 sbp=get_sbp 处理特殊的键，也支持指定普通的 SBP。</p>
+<p>rank_id = flow.env.get_rank()</p>
+<h1 id="rank">保存模型分片的路径，一个 rank 对应一个路径。<a class="headerlink" href="#rank" title="Permanent link">&para;</a></h1>
+<p>state_dict_dir = "./graph_save_load_global_" + str(rank_id)</p>
+<p>if flow.env.get_rank() in model_file_placement.ranks:
+    flow.save(
+        flow.utils.global_view.to_local(model_file_state_dict),
+        state_dict_dir,
+    )
+```</p>
 <p>首先，将原模型（state_dict）转化到模型文件的 Placement 和 SBP 上，model_file_placement 为要分片保存模型的设备阵列，也就是将 state dict 按 split(0) 分片到 model_file_placement 上。这里之所以自定义 get_sbp 函数，是因为用户可以传进来一个 <code>(x, tensor) -&gt; sbp</code> 的函数来解决特殊 Tensor 对应不同 SBP 的需求。举个例子(当前例子基于 Graph 模式)，对于  <code>state_dict["System-Train-TrainStep"]</code>  这种 shape 为 [1] 的 Tensor，我们就不能按 split(0) 分片了，SBP 可以选用 broadcast。而 <code>state_dict["module_pipeline"]["m_stage3.linear.weight"]</code>  只能在第 1 维度切分，对于 <code>state_dict["module_pipeline"]["m_stage3.linear.bias"]</code> 这种不可切分的小 Tensor(s)，SBP 可以选用 broadcast。这样支持用户 DIY SBP 的处理，更加灵活。</p>
 <p>在后面的处理中，使用 <code>flow.utils.global_view.to_local()</code> 接口得到 model_file_state_dict  的本地分量，并调用 <a href="https://oneflow.readthedocs.io/en/master/generated/oneflow.save.html?highlight=save">oneflow.save</a> 保存模型。其中，state_dict_dir 是带有设备 id 的目录，需要区分不同设备，推荐一个 rank 对应一个路径，路径名用 rank id 的方式。</p>
 <h3 id="_3">加载模型<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>在指定设备上分片保存模型后，加载模型的代码如下：</p>
-<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="n">cur_rank</span> <span class="ow">in</span> <span class="n">model_file_placement</span><span class="o">.</span><span class="n">ranks</span><span class="p">:</span>
-    <span class="n">local_state_dict</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">state_dict_dir</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">local_state_dict</span> <span class="o">=</span> <span class="kc">None</span>
-
-<span class="n">global_state_dict</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">global_view</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span>
-     <span class="n">local_state_dict</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">model_file_placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">get_sbp</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">graph_model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">global_state_dict</span><span class="p">)</span>
-</code></pre></div>
+<p>```python
+if cur_rank in model_file_placement.ranks:
+    local_state_dict = flow.load(state_dict_dir)
+else:
+    local_state_dict = None</p>
+<p>global_state_dict = flow.utils.global_view.to_global(
+     local_state_dict, placement=model_file_placement, sbp=get_sbp,
+)
+graph_model.load_state_dict(global_state_dict)
+```</p>
 <p>首先，用 <a href="https://oneflow.readthedocs.io/en/master/generated/oneflow.load.html?highlight=load">load()</a> 方法在每个保存切片的设备上加载 state dict。对应的，需要把 local rank 上的 state dict 转换到模型文件的 placement 和 sbp 上，得到了 global_state_dict。这一步和保存模型应该是对应的，SBP 和 Placement 也是一致的。最后，global_state_dict 可以成功加载到 graph_model（nn.Graph） 中。当然，nn.Module 和 nn.Graph 处理方法是一致的。</p>
 <h3 id="state-dict-nnmodule">将 state dict 加载到 nn.Module 中<a class="headerlink" href="#state-dict-nnmodule" title="Permanent link">&para;</a></h3>
 <p>除了以上两个特征外，在将 state dict 加载到 nn.Module 时，OneFlow 提供了 SBP 和 Placement 的自动转换。在下面的例子中，首先构造一个 m（nn.Module）对象，再将 global_state_dict 的 SBP 设置为 split(0)，而 m 的 SBP 为 broadcast。同时 placement 也放生了变化，从 <code>placement("cpu", ranks=[0, 1])</code> 到 <code>flow.placement("cpu", ranks=[0])</code>。这时用户不需要其他操作，OneFlow 会自动做 SBP 和 placement 的转换过程。</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-
-<span class="n">m</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
-<span class="n">model_file_placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-
-<span class="n">state_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;weight&quot;</span><span class="p">:</span><span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span> <span class="s2">&quot;bias&quot;</span><span class="p">:</span><span class="n">flow</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)}</span>
-<span class="n">global_state_dict</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">global_view</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span>
-    <span class="n">state_dict</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">model_file_placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
-<span class="p">)</span>
-
-<span class="n">m</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-<span class="n">m</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">global_state_dict</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
-</code></pre></div>
+<p>```python
+import oneflow as flow</p>
+<p>m = flow.nn.Linear(2,6)
+model_file_placement = flow.placement("cpu", ranks=[0, 1])</p>
+<p>state_dict = {"weight":flow.ones(3,2), "bias":flow.zeros(3)}
+global_state_dict = flow.utils.global_view.to_global(
+    state_dict, placement=model_file_placement, sbp=flow.sbp.split(0),
+)</p>
+<p>m.to_global(placement=flow.placement("cpu", ranks=[0]), sbp=flow.sbp.broadcast)
+m.load_state_dict(global_state_dict)
+print(m.state_dict())
+```</p>
 <p>使用 2 卡运行上面的代码，可以看到，我们自己构造的字典中的全局张量，已经被加载到 m Module 中。此外，输出 OrderedDict 的 tensor 的 SBP 已经从 split(0) 自动转换为 broadcast，'weight' 对应 tensor 的形状也是我们期待的 <code>[6, 2]</code>，'bias' 形状为 <code>[6]</code>。</p>
-<div class="highlight"><pre><span></span><code>OrderedDict([(&#39;weight&#39;, tensor([[1., 1.],
+<p><code>OrderedDict([('weight', tensor([[1., 1.],
         [1., 1.],
         [1., 1.],
         [1., 1.],
         [1., 1.],
-        [1., 1.]], placement=oneflow.placement(type=&quot;cpu&quot;, ranks=[0]), sbp=(oneflow.sbp.broadcast,), dtype=oneflow.float32,
-       requires_grad=True)), (&#39;bias&#39;, tensor([0., 0., 0., 0., 0., 0.], placement=oneflow.placement(type=&quot;cpu&quot;, ranks=[0]), sbp=(oneflow.sbp.broadcast,),
-       dtype=oneflow.float32, requires_grad=True))])
-</code></pre></div>
+        [1., 1.]], placement=oneflow.placement(type="cpu", ranks=[0]), sbp=(oneflow.sbp.broadcast,), dtype=oneflow.float32,
+       requires_grad=True)), ('bias', tensor([0., 0., 0., 0., 0., 0.], placement=oneflow.placement(type="cpu", ranks=[0]), sbp=(oneflow.sbp.broadcast,),
+       dtype=oneflow.float32, requires_grad=True))])</code></p>
 <h2 id="_4">一个完整示例<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
 <p>上面，我们演示了如何分片保存和加载模型。在这一部分，提供一份完整的代码参考，下面的例子为 4 个 ranks 上的流水并行，模拟了模型分片保存和加载的过程。</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-
-<span class="n">model_tensor_placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-<span class="c1"># model_file_placement 为存储模型分片的设备的 placement，表示在 Rank 2 和 Rank 3 上可为 None。</span>
-<span class="n">model_file_placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-<span class="n">P0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="n">model_tensor_placement</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">P1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="n">model_tensor_placement</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">P2</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="n">model_tensor_placement</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-<span class="n">P3</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="n">model_tensor_placement</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
-
-<span class="k">def</span> <span class="nf">get_sbp</span><span class="p">(</span><span class="n">state_dict</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">tensor</span> <span class="ow">is</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;System-Train-TrainStep&quot;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
-    <span class="k">if</span> <span class="n">tensor</span> <span class="ow">is</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;module_pipeline&quot;</span><span class="p">][</span><span class="s2">&quot;m_stage3.linear.weight&quot;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">tensor</span> <span class="ow">is</span> <span class="n">state_dict</span><span class="p">[</span><span class="s2">&quot;module_pipeline&quot;</span><span class="p">][</span><span class="s2">&quot;m_stage3.linear.bias&quot;</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
-    <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="k">class</span> <span class="nc">Stage0Module</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">relu</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-
-<span class="k">class</span> <span class="nc">Stage1Module</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">relu</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-
-<span class="k">class</span> <span class="nc">Stage2Module</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">relu</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-
-<span class="k">class</span> <span class="nc">Stage3Module</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-<span class="c1"># 模拟 4 个 ranks 上的流水并行</span>
-<span class="k">class</span> <span class="nc">PipelineModule</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span> <span class="o">=</span> <span class="n">Stage0Module</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span> <span class="o">=</span> <span class="n">Stage1Module</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage2</span> <span class="o">=</span> <span class="n">Stage2Module</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage3</span> <span class="o">=</span> <span class="n">Stage3Module</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P1</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage2</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P2</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage3</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P3</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">out_stage0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-
-        <span class="n">in_stage1</span> <span class="o">=</span> <span class="n">out_stage0</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P1</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-        <span class="n">out_stage1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span><span class="p">(</span><span class="n">in_stage1</span><span class="p">)</span>
-
-        <span class="n">in_stage2</span> <span class="o">=</span> <span class="n">out_stage1</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P2</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-        <span class="n">out_stage2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage2</span><span class="p">(</span><span class="n">in_stage2</span><span class="p">)</span>
-
-        <span class="n">in_stage3</span> <span class="o">=</span> <span class="n">out_stage2</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P3</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
-        <span class="n">out_stage3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage3</span><span class="p">(</span><span class="n">in_stage3</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">out_stage3</span>
-
-<span class="k">class</span> <span class="nc">PipelineGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module_pipeline</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_pipeline</span> <span class="o">=</span> <span class="n">module_pipeline</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_pipeline</span><span class="o">.</span><span class="n">m_stage0</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">set_stage</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">P0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_pipeline</span><span class="o">.</span><span class="n">m_stage1</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">set_stage</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">P1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_pipeline</span><span class="o">.</span><span class="n">m_stage2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">set_stage</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">P2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">module_pipeline</span><span class="o">.</span><span class="n">m_stage3</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">set_stage</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">P3</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">set_gradient_accumulation_steps</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span>
-            <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module_pipeline</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module_pipeline</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">out</span>
-
-<span class="k">def</span> <span class="nf">train_with_graph</span><span class="p">(</span><span class="n">call_cnt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">state_dict_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_state_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="c1"># 形状为 [2, 16] 的固定输入张量</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="p">[</span>
-                <span class="mf">0.4286</span><span class="p">,</span>
-                <span class="mf">0.7402</span><span class="p">,</span>
-                <span class="mf">0.4161</span><span class="p">,</span>
-                <span class="mf">0.6103</span><span class="p">,</span>
-                <span class="mf">0.7394</span><span class="p">,</span>
-                <span class="mf">1.1330</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">0.2311</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">0.1013</span><span class="p">,</span>
-                <span class="mf">0.8537</span><span class="p">,</span>
-                <span class="mf">0.9757</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">0.9842</span><span class="p">,</span>
-                <span class="mf">0.3839</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">0.5551</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">0.8832</span><span class="p">,</span>
-                <span class="mf">0.7820</span><span class="p">,</span>
-                <span class="mf">0.7421</span><span class="p">,</span>
-            <span class="p">],</span>
-            <span class="p">[</span>
-                <span class="o">-</span><span class="mf">0.1581</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">1.0319</span><span class="p">,</span>
-                <span class="mf">1.8430</span><span class="p">,</span>
-                <span class="mf">0.3576</span><span class="p">,</span>
-                <span class="mf">0.7288</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">0.6912</span><span class="p">,</span>
-                <span class="mf">0.9966</span><span class="p">,</span>
-                <span class="mf">1.0840</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">1.1760</span><span class="p">,</span>
-                <span class="mf">1.5683</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">0.2098</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">1.6439</span><span class="p">,</span>
-                <span class="o">-</span><span class="mf">2.7049</span><span class="p">,</span>
-                <span class="mf">0.1949</span><span class="p">,</span>
-                <span class="mf">1.6377</span><span class="p">,</span>
-                <span class="mf">0.0745</span><span class="p">,</span>
-            <span class="p">],</span>
-        <span class="p">],</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-        <span class="n">placement</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span>
-        <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="n">module_pipeline</span> <span class="o">=</span> <span class="n">PipelineModule</span><span class="p">()</span>
-    <span class="n">graph_model</span> <span class="o">=</span> <span class="n">PipelineGraph</span><span class="p">(</span><span class="n">module_pipeline</span><span class="p">)</span>
-    <span class="n">cur_rank</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">call_cnt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">cur_rank</span> <span class="ow">in</span> <span class="n">model_file_placement</span><span class="o">.</span><span class="n">ranks</span><span class="p">:</span>
-            <span class="n">local_state_dict</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">state_dict_dir</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">local_state_dict</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="c1"># 使用 sbp=get_sbp 处理特殊的键</span>
-        <span class="n">global_state_dict</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">global_view</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span>
-            <span class="n">local_state_dict</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">model_file_placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">get_sbp</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">graph_model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">global_state_dict</span><span class="p">)</span>
-
-    <span class="n">graph_model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="n">state_dict</span> <span class="o">=</span> <span class="n">graph_model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">call_cnt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">model_file_state_dict</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">global_view</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span>
-            <span class="n">state_dict</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">model_file_placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">get_sbp</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span> <span class="ow">in</span> <span class="n">model_file_placement</span><span class="o">.</span><span class="n">ranks</span><span class="p">:</span>
-            <span class="n">flow</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
-                <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">global_view</span><span class="o">.</span><span class="n">to_local</span><span class="p">(</span><span class="n">model_file_state_dict</span><span class="p">),</span>
-                <span class="n">state_dict_dir</span><span class="p">,</span>
-            <span class="p">)</span>
-
-<span class="k">if</span> <span class="vm">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">rank_id</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
-    <span class="c1"># 保存路径，一个 rank 对应一个路径。</span>
-    <span class="n">state_dict_dir</span> <span class="o">=</span> <span class="s2">&quot;./graph_save_load_global_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">rank_id</span><span class="p">)</span>
-    <span class="c1"># 保存模型</span>
-    <span class="n">train_with_graph</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">state_dict_dir</span><span class="p">)</span>
-    <span class="c1"># 加载模型</span>
-    <span class="n">train_with_graph</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">state_dict_dir</span><span class="p">)</span>
+<p>```python
+import os
+import numpy as np
+import oneflow.nn as nn
+import oneflow as flow</p>
+<p>model_tensor_placement = flow.placement("cuda", ranks=[0, 1, 2, 3])</p>
+<h1 id="model_file_placement-placement-rank-2-rank-3-none">model_file_placement 为存储模型分片的设备的 placement，表示在 Rank 2 和 Rank 3 上可为 None。<a class="headerlink" href="#model_file_placement-placement-rank-2-rank-3-none" title="Permanent link">&para;</a></h1>
+<p>model_file_placement = flow.placement("cpu", ranks=[0, 1])
+P0 = flow.placement(model_tensor_placement.type, ranks=[0])
+P1 = flow.placement(model_tensor_placement.type, ranks=[1])
+P2 = flow.placement(model_tensor_placement.type, ranks=[2])
+P3 = flow.placement(model_tensor_placement.type, ranks=[3])</p>
+<p>def get_sbp(state_dict, tensor):
+    if tensor is state_dict["System-Train-TrainStep"]:
+        return flow.sbp.broadcast
+    if tensor is state_dict["module_pipeline"]["m_stage3.linear.weight"]:
+        return flow.sbp.split(1)
+    if tensor is state_dict["module_pipeline"]["m_stage3.linear.bias"]:
+        return flow.sbp.broadcast
+    return flow.sbp.split(0)</p>
+<p>class Stage0Module(flow.nn.Module):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.linear = flow.nn.Linear(16, 8)
+        self.relu = flow.nn.ReLU()</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    return self.relu(self.linear(x))
 </code></pre></div>
+
+<p>class Stage1Module(flow.nn.Module):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.linear = flow.nn.Linear(8, 4)
+        self.relu = flow.nn.ReLU()</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    return self.relu(self.linear(x))
+</code></pre></div>
+
+<p>class Stage2Module(flow.nn.Module):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.linear = flow.nn.Linear(4, 2)
+        self.relu = flow.nn.ReLU()</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    return self.relu(self.linear(x))
+</code></pre></div>
+
+<p>class Stage3Module(flow.nn.Module):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.linear = flow.nn.Linear(2, 1)</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    return self.linear(x)
+</code></pre></div>
+
+<h1 id="4-ranks">模拟 4 个 ranks 上的流水并行<a class="headerlink" href="#4-ranks" title="Permanent link">&para;</a></h1>
+<p>class PipelineModule(flow.nn.Module):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.m_stage0 = Stage0Module()
+        self.m_stage1 = Stage1Module()
+        self.m_stage2 = Stage2Module()
+        self.m_stage3 = Stage3Module()</p>
+<div class="codehilite"><pre><span></span><code>    self.m_stage0.to_global(placement=P0, sbp=flow.sbp.broadcast)
+    self.m_stage1.to_global(placement=P1, sbp=flow.sbp.broadcast)
+    self.m_stage2.to_global(placement=P2, sbp=flow.sbp.broadcast)
+    self.m_stage3.to_global(placement=P3, sbp=flow.sbp.broadcast)
+
+def forward(self, x):
+    out_stage0 = self.m_stage0(x)
+
+    in_stage1 = out_stage0.to_global(placement=P1, sbp=flow.sbp.broadcast)
+    out_stage1 = self.m_stage1(in_stage1)
+
+    in_stage2 = out_stage1.to_global(placement=P2, sbp=flow.sbp.broadcast)
+    out_stage2 = self.m_stage2(in_stage2)
+
+    in_stage3 = out_stage2.to_global(placement=P3, sbp=flow.sbp.broadcast)
+    out_stage3 = self.m_stage3(in_stage3)
+
+    return out_stage3
+</code></pre></div>
+
+<p>class PipelineGraph(flow.nn.Graph):
+    def <strong>init</strong>(self, module_pipeline):
+        super().<strong>init</strong>()
+        self.module_pipeline = module_pipeline
+        self.module_pipeline.m_stage0.to(nn.graph.GraphModule).set_stage(0, P0)
+        self.module_pipeline.m_stage1.to(nn.graph.GraphModule).set_stage(1, P1)
+        self.module_pipeline.m_stage2.to(nn.graph.GraphModule).set_stage(2, P2)
+        self.module_pipeline.m_stage3.to(nn.graph.GraphModule).set_stage(3, P3)
+        self.config.set_gradient_accumulation_steps(2)
+        self.add_optimizer(
+            flow.optim.SGD(self.module_pipeline.parameters(), lr=0.001)
+        )</p>
+<div class="codehilite"><pre><span></span><code>def build(self, x):
+    out = self.module_pipeline(x)
+    out = out.sum()
+    out.backward()
+    return out
+</code></pre></div>
+
+<p>def train_with_graph(call_cnt=0, state_dict_dir=None, last_state_dict=None):
+    # 形状为 [2, 16] 的固定输入张量
+    x = flow.tensor(
+        [
+            [
+                0.4286,
+                0.7402,
+                0.4161,
+                0.6103,
+                0.7394,
+                1.1330,
+                -0.2311,
+                -0.1013,
+                0.8537,
+                0.9757,
+                -0.9842,
+                0.3839,
+                -0.5551,
+                -0.8832,
+                0.7820,
+                0.7421,
+            ],
+            [
+                -0.1581,
+                -1.0319,
+                1.8430,
+                0.3576,
+                0.7288,
+                -0.6912,
+                0.9966,
+                1.0840,
+                -1.1760,
+                1.5683,
+                -0.2098,
+                -1.6439,
+                -2.7049,
+                0.1949,
+                1.6377,
+                0.0745,
+            ],
+        ],
+        dtype=flow.float32,
+        placement=P0,
+        sbp=flow.sbp.broadcast,
+    )</p>
+<div class="codehilite"><pre><span></span><code>module_pipeline = PipelineModule()
+graph_model = PipelineGraph(module_pipeline)
+cur_rank = flow.env.get_rank()
+
+if call_cnt == 1:
+    if cur_rank in model_file_placement.ranks:
+        local_state_dict = flow.load(state_dict_dir)
+    else:
+        local_state_dict = None
+
+    # 使用 sbp=get_sbp 处理特殊的键
+    global_state_dict = flow.utils.global_view.to_global(
+        local_state_dict, placement=model_file_placement, sbp=get_sbp,
+    )
+    graph_model.load_state_dict(global_state_dict)
+
+graph_model(x)
+state_dict = graph_model.state_dict()
+
+if call_cnt == 0:
+    model_file_state_dict = flow.utils.global_view.to_global(
+        state_dict, placement=model_file_placement, sbp=get_sbp,
+    )
+    if flow.env.get_rank() in model_file_placement.ranks:
+        flow.save(
+            flow.utils.global_view.to_local(model_file_state_dict),
+            state_dict_dir,
+        )
+</code></pre></div>
+
+<p>if <strong>name</strong>=="<strong>main</strong>":
+    rank_id = flow.env.get_rank()
+    # 保存路径，一个 rank 对应一个路径。
+    state_dict_dir = "./graph_save_load_global_" + str(rank_id)
+    # 保存模型
+    train_with_graph(0, state_dict_dir)
+    # 加载模型
+    train_with_graph(1, state_dict_dir)</p>
+<p>```</p>
 <h2 id="_5">结语<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
 <p>上文介绍了：</p>
 <ul>

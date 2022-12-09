@@ -801,29 +801,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    如何选择合适的存储配置
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    分布式训练
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dlrm" class="md-nav__link">
-    扩展阅读：DLRM
-  </a>
   
 </li>
       
@@ -1007,29 +986,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    如何选择合适的存储配置
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
-    分布式训练
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dlrm" class="md-nav__link">
-    扩展阅读：DLRM
-  </a>
   
 </li>
       
@@ -1052,12 +1010,12 @@
                 
                 <h1 id="embedding-oneembedding">大规模 Embedding 方案： OneEmbedding<a class="headerlink" href="#embedding-oneembedding" title="Permanent link">&para;</a></h1>
 <p>Embedding 是推荐系统的重要组件，也扩散到了推荐系统外的许多领域。各个框架都提供了进行 embedding 的基础算子，比如 OneFlow 中的 <code>flow.nn.Embedding</code>：</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="n">indices</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
-<span class="n">embedding</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">embedding</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+import numpy as np
+import oneflow as flow
+indices = flow.tensor([[1, 2, 4, 5], [4, 3, 2, 9]], dtype=flow.int)
+embedding = flow.nn.Embedding(10, 3)
+y = embedding(indices)</code></p>
 <p>OneFlow 为了解决大规模深度推荐系统的问题，还提供了大规模 Embedding 的方案：OneEmbedding。</p>
 <p>与普通的算子相比，OneEmbedding 有以下特点：</p>
 <ol>
@@ -1078,89 +1036,89 @@
 </ul>
 <h3 id="make_table_options">使用 <code>make_table_options</code> 配置词表<a class="headerlink" href="#make_table_options" title="Permanent link">&para;</a></h3>
 <p>以下代码，导入相关包，并使用 <code>make_table_options</code> 配置词表。OneEmbedding 支持同时创建多个词表，以下代码配置了三个词表。</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
-<span class="n">tables</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_table_options</span><span class="p">(</span>
-        <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_uniform_initializer</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-    <span class="p">),</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_table_options</span><span class="p">(</span>
-        <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_uniform_initializer</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
-    <span class="p">),</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_table_options</span><span class="p">(</span>
-        <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_uniform_initializer</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
-    <span class="p">),</span>
-<span class="p">]</span>
-</code></pre></div>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn
+import numpy as np</p>
+<p>tables = [
+    flow.one_embedding.make_table_options(
+        flow.one_embedding.make_uniform_initializer(low=-0.1, high=0.1)
+    ),
+    flow.one_embedding.make_table_options(
+        flow.one_embedding.make_uniform_initializer(low=-0.05, high=0.05)
+    ),
+    flow.one_embedding.make_table_options(
+        flow.one_embedding.make_uniform_initializer(low=-0.15, high=0.15)
+    ),
+]
+```</p>
 <p>配置词表时需要指定初始化的方式，以上词表均采用 <code>uniform</code> 方式初始化。配置词表的结果保存在 <code>tables</code> 变量中。</p>
 <p>点击 <a href="https://oneflow.readthedocs.io/en/v0.8.1/one_embedding.html#oneflow.one_embedding.make_table_options">make_table_options</a> 及 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.make_uniform_initializer.html#oneflow.one_embedding.make_uniform_initializer">make_uniform_initializer</a> 可以查看有关它们的更详细说明。</p>
 <h3 id="_1">配置词表的存储属性<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
 <p>接着运行以下代码，用于配置词表的存储属性：</p>
-<div class="highlight"><pre><span></span><code><span class="n">store_options</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_cached_ssd_store_options</span><span class="p">(</span>
-    <span class="n">cache_budget_mb</span><span class="o">=</span><span class="mi">8142</span><span class="p">,</span>
-    <span class="n">persistent_path</span><span class="o">=</span><span class="s2">&quot;/your_path_to_ssd&quot;</span><span class="p">,</span> 
-    <span class="n">capacity</span><span class="o">=</span><span class="mi">40000000</span><span class="p">,</span>
-    <span class="n">size_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>              
-    <span class="n">physical_block_size</span><span class="o">=</span><span class="mi">512</span>
-<span class="p">)</span>
-</code></pre></div>
+<p><code>python
+store_options = flow.one_embedding.make_cached_ssd_store_options(
+    cache_budget_mb=8142,
+    persistent_path="/your_path_to_ssd", 
+    capacity=40000000,
+    size_factor=1,              
+    physical_block_size=512
+)</code></p>
 <p>这里通过调用 <code>make_cached_ssd_store_options</code>，选择将词表存储在 SSD 中，并且使用 GPU 作为高速缓存。具体参数的意义可以参阅 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.make_cached_ssd_store_options.html">make_cached_ssd_store_options API 文档</a>。</p>
 <p>此外，还可以选择使用纯 GPU 存储；或者使用 CPU 内存存储词表、但用 GPU 做高速缓存。具体可以分别参阅 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.make_device_mem_store_options.html">make_device_mem_store_options</a> 及 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.make_cached_host_mem_store_options.html">make_cached_host_mem_store_options</a>。</p>
 <h3 id="embedding">实例化 Embedding<a class="headerlink" href="#embedding" title="Permanent link">&para;</a></h3>
 <p>以上配置完成后，使用 <code>MultiTableEmbedding</code> 可以得到实例化的 Embedding 层。</p>
-<div class="highlight"><pre><span></span><code><span class="n">embedding_size</span> <span class="o">=</span> <span class="mi">128</span>
-<span class="n">embedding</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">MultiTableEmbedding</span><span class="p">(</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_embedding&quot;</span><span class="p">,</span>
-    <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_size</span><span class="p">,</span>
-    <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
-    <span class="n">key_type</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
-    <span class="n">tables</span><span class="o">=</span><span class="n">tables</span><span class="p">,</span>
-    <span class="n">store_options</span><span class="o">=</span><span class="n">store_options</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">embedding</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-</code></pre></div>
+<p>```python
+embedding_size = 128
+embedding = flow.one_embedding.MultiTableEmbedding(
+    name="my_embedding",
+    embedding_dim=embedding_size,
+    dtype=flow.float,
+    key_type=flow.int64,
+    tables=tables,
+    store_options=store_options,
+)</p>
+<p>embedding.to("cuda")
+```</p>
 <p>其中，<code>tables</code> 是之前通过 <code>make_table_options</code> 配置的词表属性，<code>store_options</code> 是之前配置的存储属性，<code>embedding_dim</code> 是特征维度，<code>dtype</code> 是特征向量的数据类型，<code>key_type</code> 是特征 ID 的数据类型。</p>
 <p>如果同时创建了两个 OneEmbedding，在实例化时需要设置不同的 name 和 persistent path 参数。 更详细的信息，可以参阅 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.MultiTableEmbedding.forward.html">one_embedding.MultiTableEmbedding</a></p>
 <h3 id="graph">使用 Graph 训练<a class="headerlink" href="#graph" title="Permanent link">&para;</a></h3>
 <p>目前 OneEmbedding 仅支持在 Graph 模式下使用。</p>
 <p>在以下的例子中，我们构建了一个简单的 Graph 类，它包括了 <code>embedding</code> 和 <code>mlp</code> 两层。</p>
-<div class="highlight"><pre><span></span><code><span class="n">num_tables</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="n">mlp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">FusedMLP</span><span class="p">(</span>
-    <span class="n">in_features</span><span class="o">=</span><span class="n">embedding_size</span> <span class="o">*</span> <span class="n">num_tables</span><span class="p">,</span>
-    <span class="n">hidden_features</span><span class="o">=</span><span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">],</span>
-    <span class="n">out_features</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">skip_final_activation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">mlp</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-
-<span class="k">class</span> <span class="nc">TrainGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_lookup</span> <span class="o">=</span> <span class="n">embedding</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">mlp</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span>
-            <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span>
-            <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
-        <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
-        <span class="n">embedding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_tables</span> <span class="o">*</span> <span class="n">embedding_size</span><span class="p">)))</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">loss</span>
-</code></pre></div>
+<p>```python
+num_tables = 3
+mlp = flow.nn.FusedMLP(
+    in_features=embedding_size * num_tables,
+    hidden_features=[512, 256, 128],
+    out_features=1,
+    skip_final_activation=True,
+)
+mlp.to("cuda")</p>
+<p>class TrainGraph(flow.nn.Graph):
+    def <strong>init</strong>(self,):
+        super().<strong>init</strong>()
+        self.embedding_lookup = embedding
+        self.mlp = mlp
+        self.add_optimizer(
+            flow.optim.SGD(self.embedding_lookup.parameters(), lr=0.1, momentum=0.0)
+        )
+        self.add_optimizer(
+            flow.optim.SGD(self.mlp.parameters(), lr=0.1, momentum=0.0)
+        )
+    def build(self, ids):
+        embedding = self.embedding_lookup(ids)
+        loss = self.mlp(flow.reshape(embedding, (-1, num_tables * embedding_size)))
+        loss = loss.sum()
+        loss.backward()
+        return loss
+```</p>
 <p>然后就可以实例化 Graph，开始训练了。</p>
-<div class="highlight"><pre><span></span><code><span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">num_tables</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-<span class="n">ids_tensor</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-<span class="n">graph</span> <span class="o">=</span> <span class="n">TrainGraph</span><span class="p">()</span>
-<span class="n">loss</span> <span class="o">=</span> <span class="n">graph</span><span class="p">(</span><span class="n">ids_tensor</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+ids = np.random.randint(0, 1000, (100, num_tables), dtype=np.int64)
+ids_tensor = flow.tensor(ids, requires_grad=False).to("cuda")
+graph = TrainGraph()
+loss = graph(ids_tensor)
+print(loss)</code></p>
 <p>关于 Graph 的使用，可以参阅 <a href="../basics/08_nn_graph.html">静态图模块 nn.Graph</a> 获取更详细信息。</p>
 <h2 id="oneembedding_1">OneEmbedding 特点说明<a class="headerlink" href="#oneembedding_1" title="Permanent link">&para;</a></h2>
 <h3 id="id">特征 ID 动态扩容<a class="headerlink" href="#id" title="Permanent link">&para;</a></h3>
@@ -1173,18 +1131,20 @@
 <p>如果使用 <code>MultiTableEmbedding</code> 配置了多个表，则对于某个特征 ID，需要指明在哪个表中查询，有两种方式指明：</p>
 <p>方法一：传递一个形状为 <code>(batch_size, 词表数目)</code> 的 <code>ids</code> 用于查询，则这个 <code>ids</code> 的列，依次对应一个词表。</p>
 <p>比如：
-<div class="highlight"><pre><span></span><code><span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">488</span><span class="p">,</span> <span class="mi">333</span><span class="p">,</span> <span class="mi">220</span><span class="p">],</span> <span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">568</span><span class="p">,</span> <span class="mi">508</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-<span class="c1"># 表示在第 0 个表中查询 `[[488], [18]]`，第 1 个表中查询 `[[333], [568]]`，第 2 个表中查询 `[[220], [508]]` 对应的特征向量。</span>
-<span class="n">embedding_lookup</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
-</code></pre></div></p>
+```python
+ids = np.array([[488, 333, 220], [18, 568, 508]], dtype=np.int64)</p>
+<h1 id="0-488-18-1-333-568-2-220-508">表示在第 0 个表中查询 <code>[[488], [18]]</code>，第 1 个表中查询 <code>[[333], [568]]</code>，第 2 个表中查询 <code>[[220], [508]]</code> 对应的特征向量。<a class="headerlink" href="#0-488-18-1-333-568-2-220-508" title="Permanent link">&para;</a></h1>
+<p>embedding_lookup(ids)
+```</p>
 <p>方法二：传递 <code>ids</code> 参数的同时，再传递一个 <code>table_ids</code> 参数，它的形状与 <code>ids</code> 完全相同，在 <code>table_ids</code> 中指定表的序号。</p>
 <p>比如：
-<div class="highlight"><pre><span></span><code><span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">488</span><span class="p">,</span> <span class="mi">333</span><span class="p">,</span> <span class="mi">220</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">568</span><span class="p">,</span> <span class="mi">508</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-<span class="c1"># table_ids的shape与ids保持一致</span>
-<span class="n">table_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<span class="c1"># 表示在第 0 个表中查询 `488, 18`，第 1 个表中查询 `333, 568`，第 2 个表中查询 `220, 508` 对应的特征向量。</span>
-<span class="n">embedding_lookup</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">table_ids</span><span class="p">)</span>
-</code></pre></div></p>
+```python
+ids = np.array([488, 333, 220, 18, 568, 508], dtype=np.int64)</p>
+<h1 id="table_idsshapeids">table_ids的shape与ids保持一致<a class="headerlink" href="#table_idsshapeids" title="Permanent link">&para;</a></h1>
+<p>table_ids = np.array([0, 1, 2, 0, 1, 2])</p>
+<h1 id="0-488-18-1-333-568-2-220-508_1">表示在第 0 个表中查询 <code>488, 18</code>，第 1 个表中查询 <code>333, 568</code>，第 2 个表中查询 <code>220, 508</code> 对应的特征向量。<a class="headerlink" href="#0-488-18-1-333-568-2-220-508_1" title="Permanent link">&para;</a></h1>
+<p>embedding_lookup(ids, table_ids)
+```</p>
 <p>更详细的说明，可以参阅 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.MultiTableEmbedding.forward.html">MultiTableEmbedding.forward</a></p>
 <h3 id="_2">如何选择合适的存储配置<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <p>OneEmbedding 提供了三种存储选项配置，分别是纯 GPU 存储， 存储在 CPU 内存中并使用 GPU 显存作为高速缓存和存储在 SSD 中，并使用 GPU 显存作为高速缓存。</p>

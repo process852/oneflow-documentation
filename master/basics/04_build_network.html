@@ -916,9 +916,9 @@
                 
                 <h1 id="_1">搭建神经网络<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
 <p>​神经网络的各层，可以使用 <a href="https://oneflow.readthedocs.io/en/v0.8.1/nn.html">oneflow.nn</a> 名称空间下的 API 搭建，它提供了构建神经网络所需的常见 Module（如 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.Conv2d.html">oneflow.nn.Conv2d</a>，<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.ReLU.html">oneflow.nn.ReLU</a> 等等）。 用于搭建网络的所有 Module 类都继承自 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.Module.html">oneflow.nn.Module</a>，多个简单的 Module 可以组合在一起构成更复杂的 Module，用这种方式，用户可以轻松地搭建和管理复杂的神经网络。</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-</code></pre></div>
+<p><code>python
+import oneflow as flow
+import oneflow.nn as nn</code></p>
 <h2 id="module">定义 Module 类<a class="headerlink" href="#module" title="Permanent link">&para;</a></h2>
 <p><code>oneflow.nn</code> 下提供了常见的 Module 类，我们可以直接使用它们，或者在它们的基础上，通过自定义 Module 类搭建神经网络。搭建过程包括：</p>
 <ul>
@@ -926,28 +926,31 @@
 <li>实现类的 <code>__init__</code> 方法，在其中构建神经网络的结构</li>
 <li>实现类的 <code>forward</code> 方法，这个方法针对 Module 的输入进行计算</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">NeuralNetwork</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">NeuralNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">linear_relu_stack</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_relu_stack</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">logits</span>
-<span class="n">net</span> <span class="o">=</span> <span class="n">NeuralNetwork</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+<p>```python
+class NeuralNetwork(nn.Module):
+    def <strong>init</strong>(self):
+        super(NeuralNetwork, self).<strong>init</strong>()
+        self.flatten = nn.Flatten()
+        self.linear_relu_stack = nn.Sequential(
+            nn.Linear(28*28, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 10),
+            nn.ReLU()
+        )</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    x = self.flatten(x)
+    logits = self.linear_relu_stack(x)
+    return logits
 </code></pre></div>
+
+<p>net = NeuralNetwork()
+print(net)
+```</p>
 <p>以上代码，会输出刚刚搭建的 <code>NeuralNetwork</code> 网络的结构：</p>
-<div class="highlight"><pre><span></span><code>NeuralNetwork(
+<p><code>text
+NeuralNetwork(
   (flatten): Flatten(start_dim=1, end_dim=-1)
   (linear_relu_stack): Sequential(
     (0): Linear(in_features=784, out_features=512, bias=True)
@@ -957,18 +960,17 @@
     (4): Linear(in_features=512, out_features=10, bias=True)
     (5): ReLU()
   )
-)
-</code></pre></div>
+)</code></p>
 <p>接着，调用 <code>net</code> （注意：不推荐显式调用 <code>forward</code>）即可完成前向传播：</p>
-<div class="highlight"><pre><span></span><code><span class="n">X</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
-<span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="n">pred_probab</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">logits</span><span class="p">)</span>
-<span class="n">y_pred</span> <span class="o">=</span> <span class="n">pred_probab</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Predicted class: </span><span class="si">{</span><span class="n">y_pred</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+X = flow.ones(1, 28, 28)
+logits = net(X)
+pred_probab = nn.Softmax(dim=1)(logits)
+y_pred = pred_probab.argmax(1)
+print(f"Predicted class: {y_pred}")</code></p>
 <p>会得到类似以下的输出结果：</p>
-<div class="highlight"><pre><span></span><code>Predicted class: tensor([1], dtype=oneflow.int32)
-</code></pre></div>
+<p><code>text
+Predicted class: tensor([1], dtype=oneflow.int32)</code></p>
 <p>以上从数据输入、到网络计算，最终推理输出的流程，如下图所示：</p>
 <p><img alt="todo" src="imgs/neural-network-layers.png" /></p>
 <h2 id="flownnfunctional"><code>flow.nn.functional</code><a class="headerlink" href="#flownnfunctional" title="Permanent link">&para;</a></h2>
@@ -980,76 +982,81 @@
 </ul>
 <p>实际上，OneFlow 提供的大部分 Module 是通过封装 <code>nn.functional</code> 下的方法得到的。<code>nn.functional</code> 提供了更加细粒度管理网络的可能。</p>
 <p>以下的例子，使用 <code>nn.functional</code> 中的方法，构建与上文中 <code>NeuralNetwork</code> 类等价的 Module <code>FunctionalNeuralNetwork</code>，读者可以体会两者的异同：</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">FunctionalNeuralNetwork</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">FunctionalNeuralNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<p>```python
+class FunctionalNeuralNetwork(nn.Module):
+    def <strong>init</strong>(self):
+        super(FunctionalNeuralNetwork, self).<strong>init</strong>()</p>
+<div class="codehilite"><pre><span></span><code>    self.weight1 = nn.Parameter(flow.randn(28*28, 512))
+    self.bias1 = nn.Parameter(flow.randn(512))
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">weight1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span> <span class="mi">512</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bias1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">512</span><span class="p">))</span>
+    self.weight2 = nn.Parameter(flow.randn(512, 512))
+    self.bias2 = nn.Parameter(flow.randn(512))
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">weight2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bias2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">512</span><span class="p">))</span>
+    self.weight3 = nn.Parameter(flow.randn(512, 10))
+    self.bias3 = nn.Parameter(flow.randn(10))
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">weight3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bias3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+def forward(self, x):
+    x = x.reshape(1, 28*28)
+    out = flow.matmul(x, self.weight1)
+    out = out + self.bias1
+    out = nn.functional.relu(out)
 
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight1</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias1</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    out = flow.matmul(out, self.weight2)
+    out = out + self.bias2
+    out = nn.functional.relu(out)
 
-        <span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight2</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias2</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    out = flow.matmul(out, self.weight3)
+    out = out + self.bias3
+    out = nn.functional.relu(out)
 
-        <span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight3</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">out</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias3</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">functional</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">out</span>
-
-<span class="n">net</span> <span class="o">=</span> <span class="n">FunctionalNeuralNetwork</span><span class="p">()</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
-<span class="n">logits</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-<span class="n">pred_probab</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)(</span><span class="n">logits</span><span class="p">)</span>
-<span class="n">y_pred</span> <span class="o">=</span> <span class="n">pred_probab</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Predicted class: </span><span class="si">{</span><span class="n">y_pred</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    return out
 </code></pre></div>
+
+<p>net = FunctionalNeuralNetwork()
+X = flow.ones(1, 28, 28)
+logits = net(X)
+pred_probab = nn.Softmax(dim=1)(logits)
+y_pred = pred_probab.argmax(1)
+print(f"Predicted class: {y_pred}")
+```</p>
 <h2 id="module_1">Module 容器<a class="headerlink" href="#module_1" title="Permanent link">&para;</a></h2>
 <p>比较以上 <code>NeuralNetwork</code> 与 <code>FunctionalNeuralNetwork</code> 实现的异同，可以发现 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.Sequential.html">nn.Sequential</a> 对于简化代码起到了重要作用。</p>
 <p><code>nn.Sequential</code> 是一种特殊容器，只要是继承自 <code>nn.Module</code> 的类都可以放置放置到其中。</p>
 <p>它的特殊之处在于：当 Sequential 进行前向传播时，Sequential 会自动地将容器中包含的各层“串联”起来。具体来说，会按照各层加入 Sequential 的顺序，自动地将上一层的输出，作为下一层的输入传递，直到得到整个 Module 的最后一层的输出。</p>
 <p>以下是不使用 Sequential 构建网络的例子（不推荐）：</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MyModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">relu1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">64</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">relu2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relu1</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv2</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relu2</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">out</span>
+<p>```python
+class MyModel(nn.Module):
+    def <strong>init</strong>(self):
+        super(MyModel, self).<strong>init</strong>()
+        self.conv1 = nn.Conv2d(1,20,5)
+        self.relu1 = nn.ReLU()
+        self.conv2 = nn.Conv2d(20,64,5)
+        self.relu2 = nn.ReLU()</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    out = self.conv1(x)
+    out = self.relu1(out)
+    out = self.conv2(out)
+    out = self.relu2(out)
+    return out
 </code></pre></div>
+
+<p>```</p>
 <p>如果使用 Sequential，则看起来是这样，会显得更简洁。</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MySeqModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MySeqModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">seq</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-          <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
-          <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
-          <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">64</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
-          <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">seq</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<p>```python
+class MySeqModel(nn.Module):
+    def <strong>init</strong>(self):
+        super(MySeqModel, self).<strong>init</strong>()
+        self.seq = nn.Sequential(
+          nn.Conv2d(1,20,5),
+          nn.ReLU(),
+          nn.Conv2d(20,64,5),
+          nn.ReLU()
+        )</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    return self.seq(x)
 </code></pre></div>
+
+<p>```</p>
 <p>除了 Sequential 外，还有 <code>nn.ModuleList</code> 及 <code>nn.ModuleDict</code>，除了会自动注册参数到整个网络外，他们的其它行为类似 Python list、Python dict，只是常用简单的容器，不会自动进行前后层的前向传播，需要自己手工遍历完成各层的计算。</p>
                 
               
