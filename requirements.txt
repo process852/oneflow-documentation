@@ -31,9 +31,6 @@ mkdocs==1.2.3
 mkdocs-material==7.1.11
 mkdocs-material-extensions==1.0.1
 mkdocs-redirects==1.0.4
-mkl-fft==1.2.0
-mkl-random==1.2.0
-mkl-service==2.3.0
 mpmath==1.2.1
 mypy-extensions==0.4.3
 nltk==3.7
