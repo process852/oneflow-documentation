@@ -14,6 +14,7 @@ jobs:
         with:
           fetch-depth: 0
       - run: pip3 install --user -r requirements.txt
+      - run: pip3 freeze
       - run: git config --global user.email "ci-bot@oneflow.org"
       - run: git config --global user.name "oneflow-ci-bot"
       - run: sh ./scripts/run-mike.sh
