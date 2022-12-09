@@ -469,6 +469,47 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#hyperparameters" class="md-nav__link">
+    超参 Hyperparameters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oneflowoptim" class="md-nav__link">
+    使用 oneflow.optim 中的优化器类
+  </a>
+  
+    <nav class="md-nav" aria-label="使用 oneflow.optim 中的优化器类">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loss" class="md-nav__link">
+    loss 函数
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimizer_1" class="md-nav__link">
+    构造 optimizer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    训练
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -869,6 +910,47 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#hyperparameters" class="md-nav__link">
+    超参 Hyperparameters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oneflowoptim" class="md-nav__link">
+    使用 oneflow.optim 中的优化器类
+  </a>
+  
+    <nav class="md-nav" aria-label="使用 oneflow.optim 中的优化器类">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#loss" class="md-nav__link">
+    loss 函数
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimizer_1" class="md-nav__link">
+    构造 optimizer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    训练
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -892,41 +974,46 @@
 <p>本文将先介绍反向传播的基本概念，再介绍如何使用 <code>oneflow.optim</code> 类。</p>
 <h2 id="numpy">numpy 手工实现反向传播<a class="headerlink" href="#numpy" title="Permanent link">&para;</a></h2>
 <p>为了读者更方便理解反向传播与自动求导的关系，在这里提供了一份仅用 numpy 实现的简单模型的训练过程：</p>
-<p>```python
-import numpy as np</p>
-<p>ITER_COUNT = 500
-LR = 0.01</p>
-<h1 id="_1">前向传播<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
-<p>def forward(x, w):
-    return np.matmul(x, w)</p>
-<h1 id="_2">损失函数<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h1>
-<p>def loss(y_pred, y):
-    return ((y_pred - y) ** 2).sum()</p>
-<h1 id="_3">计算梯度<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h1>
-<p>def gradient(x, y, y_pred):
-    return np.matmul(x.T, 2 * (y_pred - y))</p>
-<p>if <strong>name</strong> == "<strong>main</strong>":
-    # 训练目标: Y = 2*X1 + 3*X2
-    x = np.array([[1, 2], [2, 3], [4, 6], [3, 1]], dtype=np.float32)
-    y = np.array([[8], [13], [26], [9]], dtype=np.float32)</p>
-<div class="codehilite"><pre><span></span><code>w = np.array([[2], [1]], dtype=np.float32)
-# 训练循环
-for i in range(0, ITER_COUNT):
-    y_pred = forward(x, w)
-    l = loss(y_pred, y)
-    if (i + 1) % 50 == 0:
-        print(f&quot;{i+1}/{500} loss:{l}&quot;)
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-    grad = gradient(x, y, y_pred)
-    w -= LR * grad
+<span class="n">ITER_COUNT</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">LR</span> <span class="o">=</span> <span class="mf">0.01</span>
 
-print(f&quot;w:{w}&quot;)
+<span class="c1"># 前向传播</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+
+
+<span class="c1"># 损失函数</span>
+<span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">y_pred</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+
+<span class="c1"># 计算梯度</span>
+<span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y_pred</span> <span class="o">-</span> <span class="n">y</span><span class="p">))</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># 训练目标: Y = 2*X1 + 3*X2</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">13</span><span class="p">],</span> <span class="p">[</span><span class="mi">26</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="c1"># 训练循环</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ITER_COUNT</span><span class="p">):</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">forward</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="mi">500</span><span class="si">}</span><span class="s2"> loss:</span><span class="si">{</span><span class="n">l</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">-=</span> <span class="n">LR</span> <span class="o">*</span> <span class="n">grad</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;w:</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
-
-<p>```</p>
 <p>输出：</p>
-<p><code>text
-50/500 loss:0.0034512376878410578
+<div class="highlight"><pre><span></span><code>50/500 loss:0.0034512376878410578
 100/500 loss:1.965487399502308e-06
 150/500 loss:1.05524122773204e-09
 200/500 loss:3.865352482534945e-12
@@ -937,15 +1024,16 @@ print(f&quot;w:{w}&quot;)
 450/500 loss:3.865352482534945e-12
 500/500 loss:3.865352482534945e-12
 w:[[2.000001 ]
- [2.9999993]]</code></p>
+ [2.9999993]]
+</code></pre></div>
 <p>注意我们选择的 loss 函数表达式为 <span class="arithmatex">\(\sum (y_{p} - y)^2\)</span>，因此 <code>loss</code> 对参数 <code>w</code>求梯度的代码为：</p>
-<p><code>python
-def gradient(x, y, y_pred):
-    return np.matmul(x.T, 2 * (y_pred - y))</code></p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">y_pred</span> <span class="o">-</span> <span class="n">y</span><span class="p">))</span>
+</code></pre></div>
 <p>更新参数采用的是 <a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent">SGD</a>：</p>
-<p><code>python
-grad = gradient(x, y, y_pred)
-w -= LR*grad</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">grad</span> <span class="o">=</span> <span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">-=</span> <span class="n">LR</span><span class="o">*</span><span class="n">grad</span>
+</code></pre></div>
 <p>总结而言，训练中的一次完整迭代包括以下步骤：</p>
 <ol>
 <li>模型根据输入、参数，计算得出预测值 (<code>y_pred</code>)</li>
@@ -959,49 +1047,50 @@ w -= LR*grad</code></p>
 <h2 id="oneflowoptim">使用 <code>oneflow.optim</code> 中的优化器类<a class="headerlink" href="#oneflowoptim" title="Permanent link">&para;</a></h2>
 <p>使用 <code>oneflow.optim</code> 中的优化器类进行反向传播会更简洁方便，接下来，我们展示如何使用。</p>
 <p>首先，先准备好数据和模型，使用 Module 的一个方便之处就是，可以把超参放置在 Module 中便于管理。</p>
-<p>```python
-import oneflow as flow</p>
-<p>x = flow.tensor([[1, 2], [2, 3], [4, 6], [3, 1]], dtype=flow.float32)
-y = flow.tensor([[8], [13], [26], [9]], dtype=flow.float32)</p>
-<p>class MyLrModule(flow.nn.Module):
-    def <strong>init</strong>(self, lr, iter_count):
-        super().<strong>init</strong>()
-        self.w = flow.nn.Parameter(flow.tensor([[2], [1]], dtype=flow.float32))
-        self.lr = lr
-        self.iter_count = iter_count</p>
-<div class="codehilite"><pre><span></span><code>def forward(self, x):
-    return flow.matmul(x, self.w)
-</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
 
-<p>model = MyLrModule(0.01, 500)
-```</p>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">13</span><span class="p">],</span> <span class="p">[</span><span class="mi">26</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">MyLrModule</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lr</span><span class="p">,</span> <span class="n">iter_count</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="n">lr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iter_count</span> <span class="o">=</span> <span class="n">iter_count</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">MyLrModule</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+</code></pre></div>
 <h3 id="loss">loss 函数<a class="headerlink" href="#loss" title="Permanent link">&para;</a></h3>
 <p>然后，选择好 loss 函数，OneFlow 自带了多种 loss 函数，我们在这里选择 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.MSELoss.html">MSELoss</a>：</p>
-<p><code>python
-loss = flow.nn.MSELoss(reduction="sum")</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">loss</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
+</code></pre></div>
 <h3 id="optimizer_1">构造 optimizer<a class="headerlink" href="#optimizer_1" title="Permanent link">&para;</a></h3>
 <p>反向传播的逻辑，都被封装在 optimizer 中。我们在此选择 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.optim.SGD.html">SGD</a>，你可以根据需要选择其它的优化算法，如 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.optim.Adam.html">Adam</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.optim.AdamW.html">AdamW</a> 等。</p>
-<p><code>python
-optimizer = flow.optim.SGD(model.parameters(), model.lr)</code></p>
-<p>构造 <code>optimizer</code>时，将模型参数及 learning rate 传递给 <code>SGD</code>。之后调用 <code>optimizer.step()</code>，在其内部就会自动完成对模型参数求梯度、并按照 SGD 算法更新模型参数。</p>
-<h3 id="_4">训练<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
-<p>以上准备完成后，可以开始训练：</p>
-<p>```python
-for i in range(0, model.iter_count):
-    y_pred = model(x)
-    l = loss(y_pred, y)
-    if (i + 1) % 50 == 0:
-        print(f"{i+1}/{model.iter_count} loss:{l.numpy()}")</p>
-<div class="codehilite"><pre><span></span><code>optimizer.zero_grad()
-l.backward()
-optimizer.step()
+<div class="highlight"><pre><span></span><code><span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">model</span><span class="o">.</span><span class="n">lr</span><span class="p">)</span>
 </code></pre></div>
+<p>构造 <code>optimizer</code>时，将模型参数及 learning rate 传递给 <code>SGD</code>。之后调用 <code>optimizer.step()</code>，在其内部就会自动完成对模型参数求梯度、并按照 SGD 算法更新模型参数。</p>
+<h3 id="_1">训练<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>以上准备完成后，可以开始训练：</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">iter_count</span><span class="p">):</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">iter_count</span><span class="si">}</span><span class="s2"> loss:</span><span class="si">{</span><span class="n">l</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-<p>print(f"\nw: {model.w}")
-```</p>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">w: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">w</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
 <p>输出：</p>
-<p>```text
-50/500 loss:0.003451163647696376
+<div class="highlight"><pre><span></span><code>50/500 loss:0.003451163647696376
 100/500 loss:1.965773662959691e-06
 150/500 loss:1.103217073250562e-09
 200/500 loss:3.865352482534945e-12
@@ -1010,10 +1099,11 @@ optimizer.step()
 350/500 loss:3.865352482534945e-12
 400/500 loss:3.865352482534945e-12
 450/500 loss:3.865352482534945e-12
-500/500 loss:3.865352482534945e-12</p>
-<p>w: tensor([[2.],
-        [3.]], dtype=oneflow.float32, grad_fn=<accumulate_grad>)
-```</p>
+500/500 loss:3.865352482534945e-12
+
+w: tensor([[2.],
+        [3.]], dtype=oneflow.float32, grad_fn=&lt;accumulate_grad&gt;)
+</code></pre></div>
                 
               
               

@@ -985,9 +985,9 @@
                 <h1 id="tensor">Tensor 张量<a class="headerlink" href="#tensor" title="Permanent link">&para;</a></h1>
 <p>神经网络中的数据，都存放在 Tensor 中，Tensor 类似多维数组或者数学上的矩阵。OneFlow 提供了很多用于操作 Tensor 的算子，Tensor 与算子一起构成神经网络。</p>
 <p>Tensor 有别于普通的多维数组的地方是：除了可以运行在 CPU 上外，它还可以运行在 其它 AI 芯片（如 NVIDIA GPU）上，因此可以提高运算速度。此外，OneFlow 还为张量提供了 <a href="05_autograd.html">自动求导</a> 的功能。</p>
-<p><code>python
-import oneflow as flow
-import numpy as np</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</code></pre></div>
 <h2 id="tensor_1">创建 Tensor<a class="headerlink" href="#tensor_1" title="Permanent link">&para;</a></h2>
 <p>有多种方法创建 Tensor，包括：</p>
 <ul>
@@ -997,106 +997,107 @@ import numpy as np</code></p>
 </ul>
 <h3 id="_1">直接从数据创建<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
 <p>可以直接从数据创建 Tensor：</p>
-<p><code>python
-x1 = flow.tensor([[1, 2], [3, 4]])
-x2 = flow.tensor([[1.0, 2.0], [3.0, 4.0]])
-print(x1)
-print(x2)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]])</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+</code></pre></div>
 <p>可以看到创建的 <code>x1</code>、<code>x2</code> Tensor，它们的类型分别是 <code>int64</code> 和 <code>float32</code>。</p>
-<p><code>text
-tensor([[1, 2],
+<div class="highlight"><pre><span></span><code>tensor([[1, 2],
         [3, 4]], dtype=oneflow.int64)
 tensor([[1., 2.],
-        [3., 4.]], dtype=oneflow.float32)</code></p>
+        [3., 4.]], dtype=oneflow.float32)
+</code></pre></div>
 <h3 id="numpy">通过 Numpy 数组创建<a class="headerlink" href="#numpy" title="Permanent link">&para;</a></h3>
 <p>Tensor 可以通过 Numpy 数组创建，只需要在创建 Tensor 对象时，将 Numpy 数组作为参数传递即可。</p>
-<p><code>python
-x3 = flow.tensor(np.ones((2,3)))
-x4 = flow.tensor(np.random.rand(2,3))
-print(x3)
-print(x4)</code></p>
-<p><code>text
-tensor([[1., 1., 1.],
+<div class="highlight"><pre><span></span><code><span class="n">x3</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)))</span>
+<span class="n">x4</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x4</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>tensor([[1., 1., 1.],
         [1., 1., 1.]], dtype=oneflow.float64)
 tensor([[0.6213, 0.6142, 0.1592],
-        [0.5539, 0.8453, 0.8576]], dtype=oneflow.float64)</code></p>
+        [0.5539, 0.8453, 0.8576]], dtype=oneflow.float64)
+</code></pre></div>
 <h3 id="_2">通过算子创建<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <p>OneFlow 中还提供了一些算子，可以通过它们创建 Tensor。比如 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.ones.html">ones</a>、 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.zeros.html">zeros</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.eye.html">eye</a>，它们分别创建全为1的张量、全为0的张量和单位张量。</p>
-<p><code>python
-x5 = flow.ones(2, 3)
-x6 = flow.zeros(2, 3)
-x7 = flow.eye(3)
-print(x5)
-print(x6)
-print(x7)</code></p>
-<p><code>text
-tensor([[1., 1., 1.],
+<div class="highlight"><pre><span></span><code><span class="n">x5</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">x6</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">x7</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x6</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x7</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>tensor([[1., 1., 1.],
         [1., 1., 1.]], dtype=oneflow.float32)
 tensor([[0., 0., 0.],
         [0., 0., 0.]], dtype=oneflow.float32)
 tensor([[1., 0., 0.],
         [0., 1., 0.],
-        [0., 0., 1.]], dtype=oneflow.float32)</code></p>
+        [0., 0., 1.]], dtype=oneflow.float32)
+</code></pre></div>
 <p><a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.randn.html">randn</a> 方法可以创建随机化的张量：</p>
-<p><code>python
-x8 = flow.randn(2,3)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x8</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="tensor-tensor"><code>Tensor</code> 与 <code>tensor</code> 的区别<a class="headerlink" href="#tensor-tensor" title="Permanent link">&para;</a></h2>
 <p>细心的用户会发现，OneFlow 中有 <a href="https://oneflow.readthedocs.io/en/v0.8.1/tensor.html">oneflow.Tensor</a> 和 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.tensor.html">oneflow.tensor</a> 两个接口，它们都能用来创建张量。那么它们有什么区别呢？</p>
 <p>简单而言，大写的 <code>Tensor</code> 数据类型默认限定为 <code>float32</code>，而小写的 <code>tensor</code> 的数据类型可以随着创建时的数据改变。以下代码展示了两者这方面的区别：</p>
-<p><code>python
-print(flow.Tensor([1, 2, 3]))
-print(flow.tensor([1, 2, 3]))
-print(flow.tensor([1.0, 2.0, 3.0]))</code></p>
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]))</span>
+</code></pre></div>
 <p>数据结果为：</p>
-<p><code>text
-tensor([1., 2., 3.], dtype=oneflow.float32)
+<div class="highlight"><pre><span></span><code>tensor([1., 2., 3.], dtype=oneflow.float32)
 tensor([1, 2, 3], dtype=oneflow.int64)
-tensor([1., 2., 3.], dtype=oneflow.float32)</code></p>
+tensor([1., 2., 3.], dtype=oneflow.float32)
+</code></pre></div>
 <p>此外，大写的 <code>Tensor</code> 可以在创建时不指定具体数据：</p>
-<p><code>python
-x9 = flow.Tensor(2, 3)
-print(x9.shape)</code></p>
-<p><code>text
-flow.Size([2, 3])</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x9</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x9</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>flow.Size([2, 3])
+</code></pre></div>
 <p>因此，如果在创建张量的同时不想指定数据，那么常常用 <code>oneflow.Tensor</code>，否则，应该使用 <code>oneflow.tensor</code>。</p>
 <h2 id="tensor_2">Tensor 的属性<a class="headerlink" href="#tensor_2" title="Permanent link">&para;</a></h2>
 <p>Tensor 的 <code>shape</code>、<code>dtype</code>、<code>device</code> 属性分别描述了 Tensor 的形状、数据类型和所在的设备类型。</p>
-<p><code>python
-x9 = flow.randn(1,4)
-print(x9.shape)
-print(x9.dtype)
-print(x9.device)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x9</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x9</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x9</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x9</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+</code></pre></div>
 <p>输出结果分别展示了张量的形状、数据类型和所处的设备（第0号 CPU 上，之所以有编号，是因为 OneFlow 很方便自然地支持分布式，可参考 <a href="../parallelism/03_consistent_tensor.html">Global Tensor</a>）</p>
-<p><code>text
-flow.Size([1, 4])
+<div class="highlight"><pre><span></span><code>flow.Size([1, 4])
 oneflow.float32
-cpu:0</code></p>
+cpu:0
+</code></pre></div>
 <p>可以通过 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.reshape.html">reshape</a> 方法改变 Tensor 的形状，用 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.Tensor.to.html">Tensor.to</a> 方法改变 Tensor 的数据类型和所处设备：</p>
-<p><code>x10 = x9.reshape(2, 2)
-x11 = x10.to(dtype=flow.int32, device=flow.device("cuda"))
+<div class="highlight"><pre><span></span><code>x10 = x9.reshape(2, 2)
+x11 = x10.to(dtype=flow.int32, device=flow.device(&quot;cuda&quot;))
 print(x10.shape)
-print(x11.dtype, x11.device)</code></p>
-<p><code>text
-flow.Size([2, 2])
-oneflow.int32 cuda:0</code></p>
+print(x11.dtype, x11.device)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>flow.Size([2, 2])
+oneflow.int32 cuda:0
+</code></pre></div>
 <h2 id="tensor_3">操作 Tensor 的常见算子<a class="headerlink" href="#tensor_3" title="Permanent link">&para;</a></h2>
 <p>OneFlow 中提供了大量的算子，对 Tensor 进行操作，它们大多在 <a href="https://oneflow.readthedocs.io/en/v0.8.1/oneflow.html">oneflow</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/tensor.html">oneflow.Tensor</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/nn.html">oneflow.nn</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/nn.functional.html">oneflow.nn.functional</a>这几个名称空间下。</p>
 <p>OneFlow 中的 Tensor，与 Numpy 数组一样易用。比如，支持与 Numpy 类似的切片操作：</p>
-<p><code>python
-tensor = flow.ones(4, 4)
-print('First row: ',tensor[0])
-print('First column: ', tensor[:, 0])
-print('Last column:', tensor[..., -1])
-tensor[:,1] = 0
-print(tensor)</code></p>
-<p><code>text
-First row:  tensor([1., 1., 1., 1.], dtype=oneflow.float32)
+<div class="highlight"><pre><span></span><code><span class="n">tensor</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;First row: &#39;</span><span class="p">,</span><span class="n">tensor</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;First column: &#39;</span><span class="p">,</span> <span class="n">tensor</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Last column:&#39;</span><span class="p">,</span> <span class="n">tensor</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">tensor</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>First row:  tensor([1., 1., 1., 1.], dtype=oneflow.float32)
 First column:  tensor([1., 1., 1., 1.], dtype=oneflow.float32)
 Last column: tensor([1., 1., 1., 1.], dtype=oneflow.float32)
 tensor([[1., 0., 1., 1.],
         [1., 0., 1., 1.],
         [1., 0., 1., 1.],
-        [1., 0., 1., 1.]], dtype=oneflow.float32)</code></p>
+        [1., 0., 1., 1.]], dtype=oneflow.float32)
+</code></pre></div>
 <p>此外，OneFlow 中还有很多其它操作，如算数相关操作的 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.add.html">add</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.sub.html">sub</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.mul.html">mul</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.div.html">div</a>等；位置相关操作的 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.scatter.html">scatter</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.gather.html">gather</a> 等；以及激活函数、卷积等（<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.functional.relu.html">relu</a>、<a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.functional.conv2d.html">conv2d</a>），点击它们的链接可以查看更详细的 API 说明，并找到更多的其它算子。</p>
                 
               

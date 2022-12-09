@@ -933,91 +933,89 @@
                 <h1 id="quickstart">QUICKSTART<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h1>
 <p>This section will take the training process of FashionMNIST as an example to briefly show how OneFlow can be used to accomplish common tasks in deep learning. Refer to the links in each section to the presentation on each subtask.</p>
 <p>Let’s start by importing the necessary libraries:</p>
-<p><code>python
-import oneflow as flow
-import oneflow.nn as nn
-from flowvision import transforms
-from flowvision import datasets</code>
+<p><div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">from</span> <span class="nn">flowvision</span> <span class="kn">import</span> <span class="n">transforms</span>
+<span class="kn">from</span> <span class="nn">flowvision</span> <span class="kn">import</span> <span class="n">datasets</span>
+</code></pre></div>
 <a href="https://github.com/Oneflow-Inc/vision">FlowVision</a> is a tool library matching with OneFlow, specific to computer vision tasks. It contains a number of models, data augmentation methods, data transformation operations and datasets. Here we import and use the data transformation module <code>transforms</code> and datasets module <code>datasets</code> provided by FlowVision.</p>
 <p>Settting batch size and device：</p>
-<p>```python
-BATCH_SIZE=64</p>
-<p>DEVICE = "cuda" if flow.cuda.is_available() else "cpu"
-print("Using {} device".format(DEVICE))
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">BATCH_SIZE</span><span class="o">=</span><span class="mi">64</span>
+
+<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using </span><span class="si">{}</span><span class="s2"> device&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">))</span>
+</code></pre></div>
 <h2 id="loading-data">Loading Data<a class="headerlink" href="#loading-data" title="Permanent link">&para;</a></h2>
 <p>OneFlow has two primitives to load data, which are <a href="03_dataset_dataloader.html">Dataset and DataLoader</a>. </p>
 <p>The <a href="https://flowvision.readthedocs.io/en/stable/flowvision.datasets.html">flowvision.datasets</a>  module contains a number of real data sets (such as MNIST, CIFAR 10, FashionMNIST).</p>
 <p>We can use <code>flowvision.datasets.FashionMNIST</code> to get the training set and test set data of FashionMNIST.</p>
-<p>```python
-training_data = datasets.FashionMNIST(
-    root="data",
-    train=True,
-    transform=transforms.ToTensor(),
-    download=True,
-    source_url="<a href="https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/mnist/Fashion-MNIST/">https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/mnist/Fashion-MNIST/</a>",</p>
-<p>)
-test_data = datasets.FashionMNIST(
-    root="data",
-    train=False,
-    transform=transforms.ToTensor(),
-    download=True,
-    source_url="<a href="https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/mnist/Fashion-MNIST/">https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/mnist/Fashion-MNIST/</a>",
-)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">training_data</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">FashionMNIST</span><span class="p">(</span>
+    <span class="n">root</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+    <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+    <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">source_url</span><span class="o">=</span><span class="s2">&quot;https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/mnist/Fashion-MNIST/&quot;</span><span class="p">,</span>
+
+<span class="p">)</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">FashionMNIST</span><span class="p">(</span>
+    <span class="n">root</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
+    <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+    <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">source_url</span><span class="o">=</span><span class="s2">&quot;https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/mnist/Fashion-MNIST/&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
 <p>Out:</p>
-<p><code>text
-Downloading https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/mnist/Fashion-MNIST/train-images-idx3-ubyte.gz to data/FashionMNIST/raw/train-images-idx3-ubyte.gz
+<div class="highlight"><pre><span></span><code>Downloading https://oneflow-public.oss-cn-beijing.aliyuncs.com/datasets/mnist/Fashion-MNIST/train-images-idx3-ubyte.gz to data/FashionMNIST/raw/train-images-idx3-ubyte.gz
 26422272/? [00:15&lt;00:00, 2940814.54it/s]
 Extracting data/FashionMNIST/raw/train-images-idx3-ubyte.gz to data/FashionMNIST/raw
-...</code></p>
+...
+</code></pre></div>
 <p>The data will be downloaded and extracted to<code>./data</code> directory.</p>
 <p>The <a href="https://oneflow.readthedocs.io/en/v0.8.1/utils.data.html?highlight=oneflow.utils.data.DataLoader#oneflow.utils.data.DataLoader">oneflow.utils.data.DataLoader</a> wraps an iterable around the <code>dataset</code>.</p>
-<p>```python
-train_dataloader = flow.utils.data.DataLoader(
-    training_data, BATCH_SIZE, shuffle=True
-)
-test_dataloader = flow.utils.data.DataLoader(
-    test_data, BATCH_SIZE, shuffle=False
-)</p>
-<p>for x, y in train_dataloader:
-    print("x.shape:", x.shape)
-    print("y.shape:", y.shape)
-    break
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">training_data</span><span class="p">,</span> <span class="n">BATCH_SIZE</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">test_dataloader</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">test_data</span><span class="p">,</span> <span class="n">BATCH_SIZE</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">train_dataloader</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;x.shape:&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;y.shape:&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">break</span>
+</code></pre></div>
 <p>Out:</p>
-<p><code>text
-x.shape: flow.Size([64, 1, 28, 28])
-y.shape: flow.Size([64])</code></p>
+<div class="highlight"><pre><span></span><code>x.shape: flow.Size([64, 1, 28, 28])
+y.shape: flow.Size([64])
+</code></pre></div>
 <blockquote>
 <p><a class="md-button md-button--primary" href="03_dataset_dataloader.html"><img alt="🔗" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f517.svg" title=":link:" /> Dataset and Dataloader</a></p>
 </blockquote>
 <h2 id="building-networks">Building Networks<a class="headerlink" href="#building-networks" title="Permanent link">&para;</a></h2>
 <p>To define a neural network in OneFlow, we create a class that inherits from <code>nn.Module</code>. We define the layers of the network in the <code>__init__</code> function and specify how data will pass through the network in the <code>forward</code> function.</p>
-<p>```python
-class NeuralNetwork(nn.Module):
-    def <strong>init</strong>(self):
-        super(NeuralNetwork, self).<strong>init</strong>()
-        self.flatten = nn.Flatten()
-        self.linear_relu_stack = nn.Sequential(
-            nn.Linear(28*28, 512),
-            nn.ReLU(),
-            nn.Linear(512, 512),
-            nn.ReLU(),
-            nn.Linear(512, 10),
-        )</p>
-<div class="codehilite"><pre><span></span><code>def forward(self, x):
-    x = self.flatten(x)
-    logits = self.linear_relu_stack(x)
-    return logits
-</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">NeuralNetwork</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NeuralNetwork</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear_relu_stack</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="p">)</span>
 
-<p>model = NeuralNetwork().to(DEVICE)
-print(model)
-```</p>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_relu_stack</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">logits</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">NeuralNetwork</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</code></pre></div>
 <p>Out:</p>
-<p><code>text
-NeuralNetwork(
+<div class="highlight"><pre><span></span><code>NeuralNetwork(
   (flatten): Flatten(start_dim=1, end_dim=-1)
   (linear_relu_stack): Sequential(
     (0): Linear(in_features=784, out_features=512, bias=True)
@@ -1026,72 +1024,68 @@ NeuralNetwork(
     (3): ReLU()
     (4): Linear(in_features=512, out_features=10, bias=True)
   )
-)</code></p>
+)
+</code></pre></div>
 <blockquote>
 <p><a class="md-button md-button--primary" href="04_build_network.html"><img alt="🔗" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f517.svg" title=":link:" /> Build Network</a></p>
 </blockquote>
 <h2 id="training-models">Training Models<a class="headerlink" href="#training-models" title="Permanent link">&para;</a></h2>
 <p>To train a model, we need a loss function (<code>loss_fn</code>) and an optimizer (<code>optimizer</code>). The loss function is used to evaluate the difference between the prediction of the neural network and the real label. The optimizer adjusts the parameters of the neural network to make the prediction closer to the real label (expected answer). Here, we use <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.optim.SGD.html">oneflow.optim.SGD</a> to be our optimizer. This process is called back propagation.</p>
-<p><code>python
-loss_fn = nn.CrossEntropyLoss().to(DEVICE)
-optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+</code></pre></div>
 <p>The <code>train</code> function is defined for training. In a single training loop, the model makes forward propagation, calculates loss, and backpropagates to update the model's parameters.</p>
-<p>```python
-def train(iter, model, loss_fn, optimizer):
-    size = len(iter.dataset)
-    for batch, (x, y) in enumerate(iter):
-        x = x.to(DEVICE)
-        y = y.to(DEVICE)</p>
-<div class="codehilite"><pre><span></span><code>    # Compute prediction error
-    pred = model(x)
-    loss = loss_fn(pred, y)
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="nb">iter</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">):</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">iter</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">batch</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">iter</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
 
-    # Backpropagation
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+        <span class="c1"># Compute prediction error</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
-    current = batch * BATCH_SIZE
-    if batch % 100 == 0:
-        print(f&quot;loss: {loss:&gt;7f}  [{current:&gt;5d}/{size:&gt;5d}]&quot;)
+        <span class="c1"># Backpropagation</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="n">current</span> <span class="o">=</span> <span class="n">batch</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span>
+        <span class="k">if</span> <span class="n">batch</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">&gt;7f</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">current</span><span class="si">:</span><span class="s2">&gt;5d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">size</span><span class="si">:</span><span class="s2">&gt;5d</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
 </code></pre></div>
-
-<p>```</p>
 <p>We also define a <code>test</code> function to verify the accuracy of the model:</p>
-<p>```python
-def test(iter, model, loss_fn):
-    size = len(iter.dataset)
-    num_batches = len(iter)
-    model.eval()
-    test_loss, correct = 0, 0
-    with flow.no_grad():
-        for x, y in iter:
-            x = x.to(DEVICE)
-            y = y.to(DEVICE)</p>
-<div class="codehilite"><pre><span></span><code>        pred = model(x)
-        test_loss += loss_fn(pred, y)
-        bool_value = (pred.argmax(1).to(dtype=flow.int64)==y)
-        correct += float(bool_value.sum().numpy())
-test_loss /= num_batches
-print(&quot;test_loss&quot;, test_loss, &quot;num_batches &quot;, num_batches)
-correct /= size
-print(f&quot;Test Error: \n Accuracy: {(100*correct):&gt;0.1f}, Avg loss: {test_loss:&gt;8f}&quot;)
-</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="nb">iter</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">):</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">iter</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="n">num_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="n">test_loss</span><span class="p">,</span> <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">with</span> <span class="n">flow</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
 
-<p>```</p>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">test_loss</span> <span class="o">+=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">bool_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">==</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">correct</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">bool_value</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+    <span class="n">test_loss</span> <span class="o">/=</span> <span class="n">num_batches</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test_loss&quot;</span><span class="p">,</span> <span class="n">test_loss</span><span class="p">,</span> <span class="s2">&quot;num_batches &quot;</span><span class="p">,</span> <span class="n">num_batches</span><span class="p">)</span>
+    <span class="n">correct</span> <span class="o">/=</span> <span class="n">size</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test Error: </span><span class="se">\n</span><span class="s2"> Accuracy: </span><span class="si">{</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">correct</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;0.1f</span><span class="si">}</span><span class="s2">, Avg loss: </span><span class="si">{</span><span class="n">test_loss</span><span class="si">:</span><span class="s2">&gt;8f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
 <p>We use the <code>train</code> function to begin the train process for several epochs and use the <code>test</code> function to assess the accuracy of the network at the end of each epoch:</p>
-<p><code>python
-epochs = 5
-for t in range(epochs):
-    print(f"Epoch {t+1}\n-------------------------------")
-    train(train_dataloader, model, loss_fn, optimizer)
-    test(test_dataloader, model, loss_fn)
-print("Done!")</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">epochs</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="se">\n</span><span class="s2">-------------------------------&quot;</span><span class="p">)</span>
+    <span class="n">train</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
+    <span class="n">test</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done!&quot;</span><span class="p">)</span>
+</code></pre></div>
 <p>Out:</p>
-<p>```text
-Epoch 1</p>
-<hr />
-<p>loss: 2.152148  [    0/60000]
+<div class="highlight"><pre><span></span><code>Epoch 1
+-------------------------------
+loss: 2.152148  [    0/60000]
 loss: 2.140148  [ 6400/60000]
 loss: 2.147773  [12800/60000]
 loss: 2.088032  [19200/60000]
@@ -1101,24 +1095,24 @@ loss: 1.994112  [38400/60000]
 loss: 1.984397  [44800/60000]
 loss: 1.918280  [51200/60000]
 loss: 1.884574  [57600/60000]
-test_loss tensor(1.9015, device='cuda:0', dtype=oneflow.float32) num_batches  157
+test_loss tensor(1.9015, device=&#39;cuda:0&#39;, dtype=oneflow.float32) num_batches  157
 Test Error:
  Accuracy: 56.3, Avg loss: 1.901461
-Epoch 2</p>
-<hr />
-<p>loss: 1.914766  [    0/60000]
+Epoch 2
+-------------------------------
+loss: 1.914766  [    0/60000]
 loss: 1.817333  [ 6400/60000]
 loss: 1.835239  [12800/60000]
 ...
-```</p>
+</code></pre></div>
 <blockquote>
 <p><a class="md-button md-button--primary" href="05_autograd.html"><img alt="🔗" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f517.svg" title=":link:" /> Autograd</a>
 <a class="md-button md-button--primary" href="06_optimization.html"><img alt="🔗" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f517.svg" title=":link:" /> Backpropagation and Optimizer</a></p>
 </blockquote>
 <h2 id="saving-and-loading-models">Saving and Loading Models<a class="headerlink" href="#saving-and-loading-models" title="Permanent link">&para;</a></h2>
 <p>Use <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.save.html">oneflow.save</a> to save the model. The saved model can be then loaded by <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.load.html">oneflow.load</a> to make predictions.</p>
-<p><code>python
-flow.save(model.state_dict(), "./model")</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">flow</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s2">&quot;./model&quot;</span><span class="p">)</span>
+</code></pre></div>
 <blockquote>
 <p><a class="md-button md-button--primary" href="07_model_load_save.html"><img alt="🔗" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f517.svg" title=":link:" /> Model Load and Save</a></p>
 </blockquote>
