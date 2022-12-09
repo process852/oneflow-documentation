@@ -36,9 +36,9 @@ mypy-extensions==0.4.3
 nltk==3.7
 packaging==21.3
 pathspec==0.10.2
-# pluggy==1.0.0
-# portalocker==2.6.0
-# protobuf==3.20.1
+pluggy==1.0.0
+portalocker==2.6.0
+protobuf==3.20.1
 # pybind11==2.10.1
 # pyflakes==2.2.0
 # Pygments==2.13.0
