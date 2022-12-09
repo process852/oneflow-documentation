@@ -945,7 +945,6 @@ class NeuralNetwork(nn.Module):
     return logits
 </code></pre></div>
 
-
 <p>net = NeuralNetwork()
 print(net)
 ```</p>
@@ -1013,7 +1012,6 @@ def forward(self, x):
     return out
 </code></pre></div>
 
-
 <p>net = FunctionalNeuralNetwork()
 X = flow.ones(1, 28, 28)
 logits = net(X)
@@ -1042,7 +1040,6 @@ class MyModel(nn.Module):
     return out
 </code></pre></div>
 
-
 <p>```</p>
 <p>如果使用 Sequential，则看起来是这样，会显得更简洁。</p>
 <p>```python
@@ -1058,7 +1055,6 @@ class MySeqModel(nn.Module):
 <div class="codehilite"><pre><span></span><code>def forward(self, x):
     return self.seq(x)
 </code></pre></div>
-
 
 <p>```</p>
 <p>除了 Sequential 外，还有 <code>nn.ModuleList</code> 及 <code>nn.ModuleDict</code>，除了会自动注册参数到整个网络外，他们的其它行为类似 Python list、Python dict，只是常用简单的容器，不会自动进行前后层的前向传播，需要自己手工遍历完成各层的计算。</p>

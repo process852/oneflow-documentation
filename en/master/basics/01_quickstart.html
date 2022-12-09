@@ -1012,7 +1012,6 @@ class NeuralNetwork(nn.Module):
     return logits
 </code></pre></div>
 
-
 <p>model = NeuralNetwork().to(DEVICE)
 print(model)
 ```</p>
@@ -1057,7 +1056,6 @@ def train(iter, model, loss_fn, optimizer):
         print(f&quot;loss: {loss:&gt;7f}  [{current:&gt;5d}/{size:&gt;5d}]&quot;)
 </code></pre></div>
 
-
 <p>```</p>
 <p>We also define a <code>test</code> function to verify the accuracy of the model:</p>
 <p>```python
@@ -1079,7 +1077,6 @@ print(&quot;test_loss&quot;, test_loss, &quot;num_batches &quot;, num_batches)
 correct /= size
 print(f&quot;Test Error: \n Accuracy: {(100*correct):&gt;0.1f}, Avg loss: {test_loss:&gt;8f}&quot;)
 </code></pre></div>
-
 
 <p>```</p>
 <p>We use the <code>train</code> function to begin the train process for several epochs and use the <code>test</code> function to assess the accuracy of the network at the end of each epoch:</p>

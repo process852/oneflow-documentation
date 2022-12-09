@@ -933,7 +933,9 @@
 <p>此外，为了方便从 PyTorch 迁移到 OneFlow 的用户，OneFlow 提供了与 <code>torch.nn.parallel.DistributedDataParallel</code> 对齐一致的接口 <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.parallel.DistributedDataParallel.html">oneflow.nn.parallel.DistributedDataParallel</a>，它也能让用户方便地从单机训练脚本，扩展为数据并行训练。</p>
 <h2 id="sbp">通过设置 SBP 做数据并行训练<a class="headerlink" href="#sbp" title="Permanent link">&para;</a></h2>
 <p>以下代码，是通过配置设置 global 张量，完成数据并行训练。点击以下 “Code” 查看详细代码。</p>
-<details class="code"><summary>Code</summary><p>```python
+<details class="code">
+<summary>Code</summary>
+<p>```python
 import oneflow as flow
 import oneflow.nn as nn
 import flowvision
@@ -979,7 +981,6 @@ optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)</p>
         print(f&quot;loss: {loss:&gt;7f}  [{current:&gt;5d}/{size:&gt;5d}]&quot;)
 </code></pre></div>
 
-
 <p>```</p>
 </details>
 <p>可以发现，这个脚本的与单机单卡的训练脚本几乎是一样的。少数的区别在于几行与 global tensor 有关的配置代码外，它们是：</p>
@@ -1020,7 +1021,9 @@ python3 -m oneflow.distributed.launch --nproc_per_node 2 ./ddp_train.py #数据�
        grad_fn=<accumulate_grad>)
 ```</p>
 <p>点击以下 “Code” 可以展开以上运行脚本的代码。</p>
-<details class="code"><summary>Code</summary><p>```python
+<details class="code">
+<summary>Code</summary>
+<p>```python
 import oneflow as flow
 from oneflow.nn.parallel import DistributedDataParallel as ddp</p>
 <p>train_x = [
@@ -1042,7 +1045,6 @@ train_y = [
     return x
 </code></pre></div>
 
-
 <p>m = Model().to("cuda")
 m = ddp(m)
 loss = flow.nn.MSELoss(reduction="sum")
@@ -1060,7 +1062,6 @@ optimizer.zero_grad()
 l.backward()
 optimizer.step()
 </code></pre></div>
-
 
 <p>print(f"\nw:{m.w}")
 ```</p>

@@ -933,7 +933,6 @@ class NeuralNetwork(nn.Module):
     return logits
 </code></pre></div>
 
-
 <p>net = NeuralNetwork()
 print(net)
 ```</p>
@@ -1002,7 +1001,6 @@ def forward(self, x):
     return out
 </code></pre></div>
 
-
 <p>net = FunctionalNeuralNetwork()
 X = flow.ones(1, 28, 28)
 logits = net(X)
@@ -1031,7 +1029,6 @@ class MyModel(nn.Module):
     return out
 </code></pre></div>
 
-
 <p>```</p>
 <p>If sequential is used, it looks like this, which will be more concise.</p>
 <p>```python
@@ -1047,7 +1044,6 @@ class MySeqModel(nn.Module):
 <div class="codehilite"><pre><span></span><code>def forward(self, x):
     return self.seq(x)
 </code></pre></div>
-
 
 <p>```</p>
 <p>Besides Sequential, there are <code>nn.ModuleList</code> and <code>nn.ModuleDict</code>. They can automatically register parameters to the whole network. But their other behavior is similar to Python list and Python dict, which are just simple containers and do not automatically propagate forward. You need manually traverse to complete the calculation of each layer.</p>

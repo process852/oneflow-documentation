@@ -1024,7 +1024,6 @@ class NeuralNetwork(nn.Module):
     return logits
 </code></pre></div>
 
-
 <p>model = NeuralNetwork().to(DEVICE)
 print(model)
 ```</p>
@@ -1069,7 +1068,6 @@ def train(iter, model, loss_fn, optimizer):
         print(f&quot;loss: {loss:&gt;7f}  [{current:&gt;5d}/{size:&gt;5d}]&quot;)
 </code></pre></div>
 
-
 <p>```</p>
 <p>同时，定义一个 <code>test</code> 函数，用于检验模型的精度：</p>
 <p>```python
@@ -1091,7 +1089,6 @@ print(&quot;test_loss&quot;, test_loss, &quot;num_batches &quot;, num_batches)
 correct /= size
 print(f&quot;Test Error: \n Accuracy: {(100*correct):&gt;0.1f}, Avg loss: {test_loss:&gt;8f}&quot;)
 </code></pre></div>
-
 
 <p>```</p>
 <p>然后可以开始训练，定义5轮 epoch，每训练完一个 epoch 都使用 <code>test</code> 来评估一下网络的精度：</p>

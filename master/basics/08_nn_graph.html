@@ -961,7 +961,9 @@
 <h2 id="oneflow-eager">OneFlow 的 Eager 模式<a class="headerlink" href="#oneflow-eager" title="Permanent link">&para;</a></h2>
 <p>OneFlow 默认以 Eager 模式运行。</p>
 <p>以下脚本，使用 CIFAR10 数据集训练 <code>mobilenet_v2</code> 模型。</p>
-<details class="code"><summary>Code</summary><p>```python
+<details class="code">
+<summary>Code</summary>
+<p>```python
 import oneflow as flow
 import oneflow.nn as nn
 import flowvision
@@ -1005,7 +1007,6 @@ optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)</p>
         print(f&quot;loss: {loss:&gt;7f}  [{current:&gt;5d}/{size:&gt;5d}]&quot;)
 </code></pre></div>
 
-
 <p>```</p>
 </details>
 <p>输出：</p>
@@ -1029,7 +1030,6 @@ import oneflow.nn as nn</p>
 <div class="codehilite"><pre><span></span><code>def forward(self, input):
     return flow.matmul(input, self.weight) + self.bias
 </code></pre></div>
-
 
 <p>linear_model = ModuleMyLinear(4, 3)</p>
 <p>class GraphMyLinear(nn.Graph):
@@ -1067,7 +1067,6 @@ class ModelGraph(flow.nn.Graph):
     return loss
 </code></pre></div>
 
-
 <p>model_graph = ModelGraph()
 ```</p>
 <p>与 Module 的显著区别在于，Graph 使用 <code>build</code> 而不是 <code>forward</code> 方法描述计算过程，这是因为 <code>build</code> 不仅可以包含前向计算，还可以设置 <code>loss</code>，优化器等，在下文会看到使用 Graph 做训练的实际例子。</p>
@@ -1082,7 +1081,6 @@ class GraphMobileNetV2(flow.nn.Graph):
     return self.model(x)
 </code></pre></div>
 
-
 <p>graph_mobile_net_v2 = GraphMobileNetV2()</p>
 <p>x, _ = next(iter(train_dataloader))
 x = x.to(DEVICE)
@@ -1090,7 +1088,9 @@ y_pred = graph_mobile_net_v2(x)
 ```</p>
 <h3 id="graph_2">使用 Graph 做训练<a class="headerlink" href="#graph_2" title="Permanent link">&para;</a></h3>
 <p>可以直接使用 Graph 做训练。点击以下 “Code” 查看详细代码。</p>
-<details class="code"><summary>Code</summary><p>```python
+<details class="code">
+<summary>Code</summary>
+<p>```python
 import oneflow as flow
 import oneflow.nn as nn
 import flowvision
@@ -1126,7 +1126,6 @@ optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)</p>
     return loss
 </code></pre></div>
 
-
 <p>graph_mobile_net_v2 = GraphMobileNetV2()</p>
 <h1 id="graph_mobile_net_v2debug">graph_mobile_net_v2.debug()<a class="headerlink" href="#graph_mobile_net_v2debug" title="Permanent link">&para;</a></h1>
 <p>for t in range(EPOCH_NUM):
@@ -1155,7 +1154,6 @@ optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)</p>
     loss.backward() # (3)
     # ...
 </code></pre></div>
-
 
 <p>```</p>
 <ol>
@@ -1239,41 +1237,41 @@ graph_mobile_net_v2.debug(1)</code></p>
 <table>
 <thead>
 <tr>
-<th align="center">Name</th>
-<th align="center">Info</th>
-<th align="center">Example</th>
+<th style="text-align: center;">Name</th>
+<th style="text-align: center;">Info</th>
+<th style="text-align: center;">Example</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="center">GRAPH</td>
-<td align="center">用户所定义的 Graph 信息，依次是类型：名字：构造方法。</td>
-<td align="center"><code>(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2)</code></td>
+<td style="text-align: center;">GRAPH</td>
+<td style="text-align: center;">用户所定义的 Graph 信息，依次是类型：名字：构造方法。</td>
+<td style="text-align: center;"><code>(GRAPH:GraphMobileNetV2_0:GraphMobileNetV2)</code></td>
 </tr>
 <tr>
-<td align="center">CONFIG</td>
-<td align="center">Graph 的配置信息。如是否处于训练模式，<code>training=True</code> 表示 Graph 处于训练模式，如果在 Graph 的预测模式，则对应 <code>training=False</code>。</td>
-<td align="center"><code>(CONFIG:config:GraphConfig(training=True, )</code></td>
+<td style="text-align: center;">CONFIG</td>
+<td style="text-align: center;">Graph 的配置信息。如是否处于训练模式，<code>training=True</code> 表示 Graph 处于训练模式，如果在 Graph 的预测模式，则对应 <code>training=False</code>。</td>
+<td style="text-align: center;"><code>(CONFIG:config:GraphConfig(training=True, )</code></td>
 </tr>
 <tr>
-<td align="center">MODULE</td>
-<td align="center">对应 <code>nn.Module</code> ，MODULE 可以在 Graph 标签下层，同时，多个 MODULE 之间也存在层级关系。</td>
-<td align="center"><code>(MODULE:model:MobileNetV2())</code>，其中，<code>MobileNetV2</code> 为用户复用 Eager 模式下的 Module 类名。</td>
+<td style="text-align: center;">MODULE</td>
+<td style="text-align: center;">对应 <code>nn.Module</code> ，MODULE 可以在 Graph 标签下层，同时，多个 MODULE 之间也存在层级关系。</td>
+<td style="text-align: center;"><code>(MODULE:model:MobileNetV2())</code>，其中，<code>MobileNetV2</code> 为用户复用 Eager 模式下的 Module 类名。</td>
 </tr>
 <tr>
-<td align="center">PARAMETER</td>
-<td align="center">给出了更清晰的 weight 和 bias 信息。此外，在构图时，tensor 的数据内容不太重要，所以只展示了 tensor 的元信息，这些信息对构建网络更为重要。</td>
-<td align="center"><code>(PARAMETER:model.features.0.1.weight:tensor(..., device='cuda:0', size=(32,), dtype=oneflow.float32, requires_grad=True))</code></td>
+<td style="text-align: center;">PARAMETER</td>
+<td style="text-align: center;">给出了更清晰的 weight 和 bias 信息。此外，在构图时，tensor 的数据内容不太重要，所以只展示了 tensor 的元信息，这些信息对构建网络更为重要。</td>
+<td style="text-align: center;"><code>(PARAMETER:model.features.0.1.weight:tensor(..., device='cuda:0', size=(32,), dtype=oneflow.float32, requires_grad=True))</code></td>
 </tr>
 <tr>
-<td align="center">BUFFER</td>
-<td align="center">在训练时产生的统计特性等内容，如 running_mean 和   running_var。</td>
-<td align="center"><code>(BUFFER:model.features.0.1.running_mean:tensor(..., device='cuda:0', size=(32,), dtype=oneflow.float32))</code></td>
+<td style="text-align: center;">BUFFER</td>
+<td style="text-align: center;">在训练时产生的统计特性等内容，如 running_mean 和   running_var。</td>
+<td style="text-align: center;"><code>(BUFFER:model.features.0.1.running_mean:tensor(..., device='cuda:0', size=(32,), dtype=oneflow.float32))</code></td>
 </tr>
 <tr>
-<td align="center">INPUT &amp; OUPTUT</td>
-<td align="center">表示输入输出的张量信息。</td>
-<td align="center"><code>(INPUT:_model_input.0.0_2:tensor(..., device='cuda:0', is_lazy='True', size=(16, 3, 32, 32), dtype=oneflow.float32))</code></td>
+<td style="text-align: center;">INPUT &amp; OUPTUT</td>
+<td style="text-align: center;">表示输入输出的张量信息。</td>
+<td style="text-align: center;"><code>(INPUT:_model_input.0.0_2:tensor(..., device='cuda:0', is_lazy='True', size=(16, 3, 32, 32), dtype=oneflow.float32))</code></td>
 </tr>
 </tbody>
 </table>
@@ -1329,7 +1327,6 @@ from flowvision.models.neural_style_transfer.stylenet import neural_style_transf
     return self.model(*input)
 </code></pre></div>
 
-
 <p>if <strong>name</strong> == "<strong>main</strong>":
     fake_image = flow.ones((1, 3, 256, 256))
     model = neural_style_transfer(pretrained=True, progress=True)
@@ -1342,7 +1339,6 @@ if not os.path.exists(MODEL_SAVE_DIR):
     os.makedirs(MODEL_SAVE_DIR)
 flow.save(graph, MODEL_SAVE_DIR)
 </code></pre></div>
-
 
 <p>```</p>
 <p>以上代码几处的关键代码：</p>

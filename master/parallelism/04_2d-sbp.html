@@ -1042,7 +1042,9 @@ tensor([[[ 0.6068,  0.1986, -0.6363, -0.5572, -0.2388,  1.1607, -0.7186,  1.2161
 python3 -m oneflow.distributed.launch --nproc_per_node=4 2d_sbp.py</code>
 在此，通过将参数 <code>nproc_per_node</code> 指定为 4 来创建 4 个进程，模拟共有 4 个 GPU 的情形。关于此模块的详细用法，请参见：<a href="04_launch.html">用 launch 模块启动分布式训练</a>。</p>
 <p>完整代码如下：</p>
-<details class="code"><summary>Code</summary><p>```python
+<details class="code">
+<summary>Code</summary>
+<p>```python
 PLACEMENT = flow.placement("cpu", [[0, 1], [2, 3]])
 BROADCAST = (flow.sbp.broadcast, flow.sbp.broadcast)
 BS0 = (flow.sbp.broadcast, flow.sbp.split(0))</p>
