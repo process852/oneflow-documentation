@@ -950,6 +950,7 @@ class CustomGraph(flow.nn.Graph):
     return y_pred
 </code></pre></div>
 
+
 <p>```</p>
 <p>然后，像以往那样开始训练等操作即可。</p>
 <p>```python
@@ -959,6 +960,7 @@ graph_model = CustomGraph()</p>
     y = flow.ones(128, 1, dtype=flow.int64).to(DEVICE)</p>
 <div class="codehilite"><pre><span></span><code>graph_model(x, y)
 </code></pre></div>
+
 
 <p>```</p>
 <h2 id="gradient-scaling">Gradient Scaling<a class="headerlink" href="#gradient-scaling" title="Permanent link">&para;</a></h2>

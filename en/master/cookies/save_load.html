@@ -1031,6 +1031,7 @@ P3 = flow.placement(model_tensor_placement.type, ranks=[3])</p>
     return self.relu(self.linear(x))
 </code></pre></div>
 
+
 <p>class Stage1Module(flow.nn.Module):
     def <strong>init</strong>(self):
         super().<strong>init</strong>()
@@ -1039,6 +1040,7 @@ P3 = flow.placement(model_tensor_placement.type, ranks=[3])</p>
 <div class="codehilite"><pre><span></span><code>def forward(self, x):
     return self.relu(self.linear(x))
 </code></pre></div>
+
 
 <p>class Stage2Module(flow.nn.Module):
     def <strong>init</strong>(self):
@@ -1049,6 +1051,7 @@ P3 = flow.placement(model_tensor_placement.type, ranks=[3])</p>
     return self.relu(self.linear(x))
 </code></pre></div>
 
+
 <p>class Stage3Module(flow.nn.Module):
     def <strong>init</strong>(self):
         super().<strong>init</strong>()
@@ -1056,6 +1059,7 @@ P3 = flow.placement(model_tensor_placement.type, ranks=[3])</p>
 <div class="codehilite"><pre><span></span><code>def forward(self, x):
     return self.linear(x)
 </code></pre></div>
+
 
 <h1 id="simulate-pipeline-parallelism-on-4-ranks">Simulate pipeline parallelism on 4 ranks<a class="headerlink" href="#simulate-pipeline-parallelism-on-4-ranks" title="Permanent link">&para;</a></h1>
 <p>class PipelineModule(flow.nn.Module):
@@ -1085,6 +1089,7 @@ def forward(self, x):
     return out_stage3
 </code></pre></div>
 
+
 <p>class PipelineGraph(flow.nn.Graph):
     def <strong>init</strong>(self, module_pipeline):
         super().<strong>init</strong>()
@@ -1103,6 +1108,7 @@ def forward(self, x):
     out.backward()
     return out
 </code></pre></div>
+
 
 <p>def train_with_graph(call_cnt=0, state_dict_dir=None, last_state_dict=None):
     # Fixed input tensor of shape [2, 16]
@@ -1178,6 +1184,7 @@ if call_cnt == 0:
             state_dict_dir,
         )
 </code></pre></div>
+
 
 <p>if <strong>name</strong>=="<strong>main</strong>":
     rank_id = flow.env.get_rank()

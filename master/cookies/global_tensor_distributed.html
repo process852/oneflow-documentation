@@ -1067,6 +1067,7 @@ P23 = flow.placement(type="cuda", ranks=[2, 3])</p>
     return out
 </code></pre></div>
 
+
 <p>class ModuleModel(nn.Module):
     def <strong>init</strong>(self):
         super().<strong>init</strong>()</p>
@@ -1086,6 +1087,7 @@ def forward(self, x):
 
     return out_stage0, out_stage1
 </code></pre></div>
+
 
 <p>if <strong>name</strong> == "<strong>main</strong>":
     model = ModuleModel()
@@ -1112,6 +1114,7 @@ P23 = flow.placement(type="cuda", ranks=[2, 3])</p>
     return out
 </code></pre></div>
 
+
 <p>class ModuleModel(nn.Module):
     def <strong>init</strong>(self):
         super().<strong>init</strong>()</p>
@@ -1132,6 +1135,7 @@ def forward(self, x):
     return out_stage0, out_stage1
 </code></pre></div>
 
+
 <h1 id="graph">Graph<a class="headerlink" href="#graph" title="Permanent link">&para;</a></h1>
 <p>class GraphModel(nn.Graph):
     def <strong>init</strong>(self):
@@ -1142,6 +1146,7 @@ def forward(self, x):
 <div class="codehilite"><pre><span></span><code>def build(self, x):
     return self.model(x)
 </code></pre></div>
+
 
 <p>if <strong>name</strong> == "<strong>main</strong>":
     graph = GraphModel()

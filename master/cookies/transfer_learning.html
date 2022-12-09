@@ -1052,6 +1052,7 @@ def train_model(model, train_data_loader, test_data_loader, loss_func, optimizer
     evaluate(model, test_data_loader)
 </code></pre></div>
 
+
 <p>```</p>
 <p>定义评估函数，使用准确率作为评估指标：
 ```python
@@ -1065,6 +1066,7 @@ def evaluate(model, data_loader):
         num_corrects += flow.sum(flow.argmax(preds, dim=1) == labels)</p>
 <div class="codehilite"><pre><span></span><code>print(&#39;Accuracy: &#39;, num_corrects.item() / dataset_size)
 </code></pre></div>
+
 
 <p>```</p>
 <p>我们可以通过给优化器传入相应的需要优化的参数，来实现上文中提到的三种方式。</p>

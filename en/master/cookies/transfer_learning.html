@@ -1040,6 +1040,7 @@ def train_model(model, train_data_loader, test_data_loader, loss_func, optimizer
     evaluate(model, test_data_loader)
 </code></pre></div>
 
+
 <p>```</p>
 <p>Define the evaluation function with the accuracy rate as the evaluation metric:
 ```python
@@ -1053,6 +1054,7 @@ def evaluate(model, data_loader):
         num_corrects += flow.sum(flow.argmax(preds, dim=1) == labels)</p>
 <div class="codehilite"><pre><span></span><code>print(&#39;Accuracy: &#39;, num_corrects.item() / dataset_size)
 </code></pre></div>
+
 
 <p>```
 The three methods mentioned above can be implemented by passing in the corresponding parameters that need to be optimized to the optimizer.</p>

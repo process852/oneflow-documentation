@@ -937,7 +937,6 @@ import oneflow as flow</p>
 <li><code>sbp</code> 表示 Global Tensor 分布的方式，代码中的 <code>sbp = flow.sbp.split(dim=0)</code> 表示把 Global Tensor 在维度 0 均匀切分；</li>
 <li><code>to_local()</code> 可以从 Global Tensor 中获取其在当前 rank 的 Local Tensor，因为 Global Tensor 在每个 rank 都内含了一个 Local Tensor 作为实际存在的本地分量。</li>
 </ul>
-<p>然后配置下多进程启动依赖的环境变量。这里是两卡执行，对应两个进程启动，所以需要打开两个 Terminal，分别配置如下环境变量：</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>分别 <strong>点击</strong> 以下 Terminal 0 或 Terminal 1 标签，查看 2 个控制台的命令/代码</p>

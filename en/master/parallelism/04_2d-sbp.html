@@ -1037,9 +1037,7 @@ Through comparing these local tensors on different "devices", we can see that it
 python3 -m oneflow.distributed.launch --nproc_per_node=4 2d_sbp.py</code>
 Here, the parameter <code>nproc_per_node</code> is assigned as 4 to create 4 processes, simulating a total of 4 GPUs. For detailed usage of this module, please read: <a href="04_launch.html">DISTRIBUTED TRAINING LAUNCHER</a>.</p>
 <p>The complete code is as follows:</p>
-<details class="code">
-<summary>Code</summary>
-<p>```python
+<details class="code"><summary>Code</summary><p>```python
 PLACEMENT = flow.placement("cpu", [[0, 1], [2, 3]])
 BROADCAST = (flow.sbp.broadcast, flow.sbp.broadcast)
 BS0 = (flow.sbp.broadcast, flow.sbp.split(0))</p>

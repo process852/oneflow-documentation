@@ -1059,6 +1059,7 @@ def build(self, x, y):
     return preds
 </code></pre></div>
 
+
 <p>```</p>
 <p>定义训练流程：</p>
 <p>```python
@@ -1070,6 +1071,7 @@ graph_model = CustomGraph()</p>
     global_y = y.to_global(placement=P, sbp=S0)</p>
 <div class="codehilite"><pre><span></span><code>graph_model(global_x, global_y)
 </code></pre></div>
+
 
 <p>```</p>
 <p>然后通过 <a href="../parallelism/04_launch.html">launch 模块</a> 启动训练即可。</p>
