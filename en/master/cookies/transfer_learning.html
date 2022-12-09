@@ -978,98 +978,101 @@
 <p>In this section, ResNet-18 is used as the feature extractor for image classification task on <a href="http://www.cs.toronto.edu/~kriz/cifar.html">CIFAR-10 Dataset</a></p>
 <p>Pretrained models for ResNet-18 (trained on ImageNet dataset), and CIFAR-10 dataset are both conveniently available through <a href="https://github.com/Oneflow-Inc/vision">FlowVision</a>.</p>
 <p>First import the required dependencies:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">from</span> <span class="nn">oneflow</span> <span class="kn">import</span> <span class="n">nn</span>
-<span class="kn">from</span> <span class="nn">oneflow.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
-
-<span class="kn">from</span> <span class="nn">flowvision.models</span> <span class="kn">import</span> <span class="n">resnet18</span>
-<span class="kn">from</span> <span class="nn">flowvision.datasets</span> <span class="kn">import</span> <span class="n">CIFAR10</span>
-<span class="kn">import</span> <span class="nn">flowvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
-</code></pre></div>
+<p>```python
+import oneflow as flow
+from oneflow import nn
+from oneflow.utils.data import DataLoader</p>
+<p>from flowvision.models import resnet18
+from flowvision.datasets import CIFAR10
+import flowvision.transforms as transforms
+```</p>
 <p>Define epoch, batch size, and the computing device used：
-<div class="highlight"><pre><span></span><code><span class="n">NUM_EPOCHS</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="n">BATCH_SIZE</span> <span class="o">=</span> <span class="mi">64</span>
-<span class="n">DEVICE</span> <span class="o">=</span> <span class="s1">&#39;cuda&#39;</span> <span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s1">&#39;cpu&#39;</span>
-</code></pre></div></p>
+<code>python
+NUM_EPOCHS = 3
+BATCH_SIZE = 64
+DEVICE = 'cuda' if flow.cuda.is_available() else 'cpu'</code></p>
 <h3 id="data-loading-and-preprocessing">Data Loading and Preprocessing<a class="headerlink" href="#data-loading-and-preprocessing" title="Permanent link">&para;</a></h3>
 <p>Define Dataset and DataLoader:</p>
-<div class="highlight"><pre><span></span><code><span class="n">train_transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
-    <span class="n">transforms</span><span class="o">.</span><span class="n">RandomHorizontalFlip</span><span class="p">(),</span>
-    <span class="n">transforms</span><span class="o">.</span><span class="n">RandomVerticalFlip</span><span class="p">(),</span>
-    <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
-    <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
-    <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">([</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">])</span>
-<span class="p">])</span>
-<span class="n">test_transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
-    <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="mi">224</span><span class="p">),</span>
-    <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
-    <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">([</span><span class="mf">0.485</span><span class="p">,</span> <span class="mf">0.456</span><span class="p">,</span> <span class="mf">0.406</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.229</span><span class="p">,</span> <span class="mf">0.224</span><span class="p">,</span> <span class="mf">0.225</span><span class="p">])</span>
-<span class="p">])</span>
-
-<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">CIFAR10</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;./data&#39;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">train_transform</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">CIFAR10</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;./data&#39;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">test_transform</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">train_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">BATCH_SIZE</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">test_data_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">BATCH_SIZE</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-</code></pre></div>
+<p>```python
+train_transform = transforms.Compose([
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomVerticalFlip(),
+    transforms.Resize(224),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
+test_transform = transforms.Compose([
+    transforms.Resize(224),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])</p>
+<p>train_dataset = CIFAR10(root='./data', train=True, transform=train_transform, download=True)
+test_dataset = CIFAR10(root='./data', train=False, transform=test_transform, download=True)</p>
+<p>train_data_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
+test_data_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
+```</p>
 <h3 id="define-the-model">Define the Model<a class="headerlink" href="#define-the-model" title="Permanent link">&para;</a></h3>
-<p><div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">resnet18</span><span class="p">(</span><span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+model = resnet18(pretrained=True)</code>
 Here, we get the ResNet-18 model loaded with pretrained weights by setting the <code>pretrained</code> parameter to <code>True</code>. If we output <code>model.fc</code>, we will get "Linear(in_features=512, out_features=1000, bias=True)". We can see that this classifier has 1000 output neurons, corresponding to 1000 categories of ImageNet. The CIFAR-10 dataset has 10 classes, so we need to replace this fully connected layer classifier:</p>
-<div class="highlight"><pre><span></span><code><span class="n">model</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">in_features</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+model.fc = nn.Linear(model.fc.in_features, 10)</code></p>
 <p>And load the model to the computing device:
-<div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-</code></pre></div></p>
+<code>python
+model = model.to(DEVICE)</code></p>
 <h3 id="train-the-model">Train the Model<a class="headerlink" href="#train-the-model" title="Permanent link">&para;</a></h3>
 <p>Define the training function:
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_data_loader</span><span class="p">,</span> <span class="n">test_data_loader</span><span class="p">,</span> <span class="n">loss_func</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">):</span>
-    <span class="n">dataset_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_data_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_EPOCHS</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">batch</span><span class="p">,</span> <span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_data_loader</span><span class="p">):</span>
-            <span class="n">images</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">images</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">),</span> <span class="n">labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-            <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
-            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_func</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
-            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
-            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+```python
+def train_model(model, train_data_loader, test_data_loader, loss_func, optimizer):
+    dataset_size = len(train_data_loader.dataset)
+    model.train()
+    for epoch in range(NUM_EPOCHS):
+        for batch, (images, labels) in enumerate(train_data_loader):
+            images, labels = images.to(DEVICE), labels.to(DEVICE)
+            preds = model(images)
+            loss = loss_func(preds, labels)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()</p>
+<div class="codehilite"><pre><span></span><code>        if batch % 100 == 0:
+            print(f&#39;loss: {loss:&gt;7f}  [epoch: {epoch} {batch * BATCH_SIZE:&gt;5d}/{dataset_size:&gt;5d}]&#39;)
 
-            <span class="k">if</span> <span class="n">batch</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s1">&gt;7f</span><span class="si">}</span><span class="s1">  [epoch: </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">batch</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span><span class="si">:</span><span class="s1">&gt;5d</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">dataset_size</span><span class="si">:</span><span class="s1">&gt;5d</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">)</span>
-
-        <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">test_data_loader</span><span class="p">)</span>
-</code></pre></div></p>
-<p>Define the evaluation function with the accuracy rate as the evaluation metric:
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_loader</span><span class="p">):</span>
-    <span class="n">dataset_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-    <span class="n">num_corrects</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">images</span><span class="p">,</span> <span class="n">labels</span> <span class="ow">in</span> <span class="n">data_loader</span><span class="p">:</span>
-        <span class="n">images</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">images</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">),</span> <span class="n">labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-        <span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
-        <span class="n">num_corrects</span> <span class="o">+=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">preds</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Accuracy: &#39;</span><span class="p">,</span> <span class="n">num_corrects</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="n">dataset_size</span><span class="p">)</span>
+    evaluate(model, test_data_loader)
 </code></pre></div>
+
+<p>```</p>
+<p>Define the evaluation function with the accuracy rate as the evaluation metric:
+```python
+def evaluate(model, data_loader):
+    dataset_size = len(data_loader.dataset)
+    model.eval()
+    num_corrects = 0
+    for images, labels in data_loader:
+        images, labels = images.to(DEVICE), labels.to(DEVICE)
+        preds = model(images)
+        num_corrects += flow.sum(flow.argmax(preds, dim=1) == labels)</p>
+<div class="codehilite"><pre><span></span><code>print(&#39;Accuracy: &#39;, num_corrects.item() / dataset_size)
+</code></pre></div>
+
+<p>```
 The three methods mentioned above can be implemented by passing in the corresponding parameters that need to be optimized to the optimizer.</p>
 <p>Method 1: Train the entire model</p>
-<p><div class="highlight"><pre><span></span><code><span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+optimizer = flow.optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=5e-4)</code>
 Method 2: Use a smaller learning rate for the feature extractor and a larger learning rate for the classifier</p>
-<p><div class="highlight"><pre><span></span><code><span class="n">fc_params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">parameters</span><span class="p">()))</span>
-<span class="n">backbone_params</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="nb">id</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fc_params</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">([{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">backbone_params</span><span class="p">,</span> <span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="mf">0.0001</span><span class="p">},</span>
-                            <span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">}],</span>
-                            <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+fc_params = list(map(id, model.fc.parameters()))
+backbone_params = filter(lambda p: id(p) not in fc_params, model.parameters())
+optimizer = flow.optim.SGD([{'params': backbone_params, 'lr': 0.0001},
+                            {'params': model.fc.parameters(), 'lr': 0.001}],
+                            momentum=0.9, weight_decay=5e-4)</code>
 Method 3: Fix the parameters of the feature extractor and only train the classifier</p>
-<div class="highlight"><pre><span></span><code><span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+optimizer = flow.optim.SGD(model.fc.parameters(), lr=0.001, momentum=0.9, weight_decay=5e-4)</code></p>
 <p>Start training:</p>
-<div class="highlight"><pre><span></span><code><span class="n">loss_func</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
-<span class="n">train_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_data_loader</span><span class="p">,</span> <span class="n">test_data_loader</span><span class="p">,</span> <span class="n">loss_func</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+loss_func = nn.CrossEntropyLoss()
+train_model(model, train_data_loader, test_data_loader, loss_func, optimizer)</code></p>
 <h3 id="comparison-of-results">Comparison of Results<a class="headerlink" href="#comparison-of-results" title="Permanent link">&para;</a></h3>
 <p>In the case of using transfer learning (the first method is used here), the accuracy of the model on the test set after training for 3 epochs reaches <strong>0.9017</strong>; If we train from scratch without transfer learning, the accuracy is only <strong>0.4957</strong> after the same 3 epochs of training. This shows that transfer learning can indeed play a significant role.</p>
                 

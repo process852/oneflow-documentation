@@ -795,13 +795,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    总结
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -904,13 +897,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    总结
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -932,59 +918,60 @@
 <p>OneFlow 的 API 与 PyTorch 对齐，用户可以很方便地将 PyTorch 模型迁移到 OneFlow。本文介绍三种方法，将使用 PyTorch 运行的代码迁移到 OneFlow。</p>
 <h2 id="1-import-oneflow-as-torch">1. import oneflow as torch<a class="headerlink" href="#1-import-oneflow-as-torch" title="Permanent link">&para;</a></h2>
 <p>将原有的<code>import torch</code>的代码改为</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">torch</span>
-</code></pre></div>
+<p><code>py
+import oneflow as torch</code></p>
 <p>就可以使用 OneFlow 训练原有模型；然而，这种方法需要手动修改所有 <code>import torch</code> 的文件，如果第三方库使用了 <code>torch</code>，还需要更改第三方库的源码。</p>
 <h2 id="2">2. 使用命令行工具<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
 <p>OneFlow 提供了一个命令行工具，在 OneFlow 的 Python Package 内模拟了 PyTorch 环境，并将对该模块的引用都转发到实际的 OneFlow 模块中。具体的用法如下</p>
 <p>开启模拟 PyTorch</p>
-<div class="highlight"><pre><span></span><code><span class="nb">eval</span> <span class="k">$(</span>oneflow-mock-torch<span class="k">)</span>
-</code></pre></div>
+<p><code>shell
+eval $(oneflow-mock-torch)</code></p>
 <p>或</p>
-<div class="highlight"><pre><span></span><code><span class="nb">eval</span> <span class="k">$(</span>python3 -m oneflow.mock_torch<span class="k">)</span>
-</code></pre></div>
+<p><code>shell
+eval $(python3 -m oneflow.mock_torch)</code></p>
 <p>运行上述命令后，通过以下示例观察效果</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
-<span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">flow</span><span class="o">.</span><span class="n">Tensor</span><span class="p">))</span>
-</code></pre></div>
+<p><code>py
+import torch
+print(torch.__file__)
+import oneflow as flow
+x = torch.zeros(2, 3)
+print(isinstance(x, flow.Tensor))</code></p>
 <p>关闭模拟 PyTorch</p>
-<div class="highlight"><pre><span></span><code><span class="nb">eval</span> <span class="k">$(</span>oneflow-mock-torch disable<span class="k">)</span>
-</code></pre></div>
+<p><code>shell
+eval $(oneflow-mock-torch disable)</code></p>
 <p>或</p>
-<div class="highlight"><pre><span></span><code><span class="nb">eval</span> <span class="k">$(</span>python3 -m oneflow.mock_torch disable<span class="k">)</span>
-</code></pre></div>
+<p><code>shell
+eval $(python3 -m oneflow.mock_torch disable)</code></p>
 <h2 id="3-oneflow">3. 使用 OneFlow 的内置函数<a class="headerlink" href="#3-oneflow" title="Permanent link">&para;</a></h2>
 <p>我们提供了更细粒度的 mock 功能，用户可以自行控制某段代码是否启用 mock 功能。
 如下的 <code>with</code> 语句中，导入的 PyTorch 模块实际上是 OneFlow</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow.mock_torch</span> <span class="k">as</span> <span class="nn">mock</span>
-<span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">enable</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">torch</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
-    <span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">flow</span><span class="o">.</span><span class="n">Tensor</span><span class="p">))</span>
-</code></pre></div>
+<p><code>py
+import oneflow.mock_torch as mock
+with mock.enable():
+    import torch
+    print(torch.__file__)
+    import oneflow as flow
+    x = torch.zeros(2, 3)
+    print(isinstance(x, flow.Tensor))</code></p>
 <p>当你需要使用真正的 torch 模块时，可以这样关闭 mock 功能</p>
-<div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">disable</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">torch</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
-</code></pre></div>
+<p><code>py
+with mock.disable():
+    import torch
+    print(torch.__file__)</code></p>
 <p><code>mock.enable</code> 和 <code>mock.disable</code> 也可以作为函数使用，例如，对于一段用户想要用 OneFlow 进行训练的模型，而该模型需要 PyTorch 来加载，可以这样使用</p>
-<div class="highlight"><pre><span></span><code><span class="n">mock</span><span class="o">.</span><span class="n">enable</span><span class="p">()</span>
-<span class="o">...</span>
-<span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">disable</span><span class="p">()</span>
-    <span class="n">module</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-<span class="c1"># train the module with oneflow</span>
-</code></pre></div>
+<p>```py
+mock.enable()
+...
+with mock.disable()
+    module = torch.load_module(...)</p>
+<h1 id="train-the-module-with-oneflow">train the module with oneflow<a class="headerlink" href="#train-the-module-with-oneflow" title="Permanent link">&para;</a></h1>
+<p>```</p>
 <p>enable 模式和 disable 模式各自保存了一份值为模块的字典，在开关enable/disable时会替换 <code>sys.modules</code> 和当前所属模块的全局变量，故用户需要在 enable 模式和 disable 模式时自行 <code>import</code> 需要的模块，如下代码会在 disable 的 <code>with</code> 语句里报 <code>name 'torch' is not defined</code> 的错
-<div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">enable</span><span class="p">():</span>
-    <span class="kn">import</span> <span class="nn">torch</span>
-<span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">disable</span><span class="p">():</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-</code></pre></div></p>
+<code>py
+with mock.enable():
+    import torch
+with mock.disable():
+    torch.ones(2, 3)</code></p>
 <h2 id="_1">总结<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
 <p>由于 OneFlow 的 API 与 PyTorch 对齐，用户能够将 PyTorch 代码很方便地迁移到 OneFlow。以上介绍了三种使用 OneFlow 来训练 PyTorch 模型的方法，希望用户能够体验到 OneFlow 极致的性能。</p>
                 

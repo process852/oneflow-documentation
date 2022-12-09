@@ -907,58 +907,59 @@
 <p>When we train deep learning models, we typically use 32-bit single-precision floating point (FP32), while <strong>AMP (Automatic Mixed Precision)</strong> is a technique that allows both FP32 and FP16 to be used when training models. This can make the memory usage less and the computation faster when training the model. But because the numerical range of FP16 is smaller than that of FP32, it is more prone to numerical overflow problems, and there may be some errors. But lots of practice has proved that many deep learning models can be trained with this technique without loss of accuracy.</p>
 <h2 id="example-of-using-amp">Example of using AMP<a class="headerlink" href="#example-of-using-amp" title="Permanent link">&para;</a></h2>
 <p>First, we define a simple model, loss function and optimizer in exactly the same way as before.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-
-<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using </span><span class="si">{}</span><span class="s2"> device&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">))</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
-    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">),</span> 
-    <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
-    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
-
-<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
-</code></pre></div>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn</p>
+<p>DEVICE = "cuda" if flow.cuda.is_available() else "cpu"
+print("Using {} device".format(DEVICE))</p>
+<p>model = nn.Sequential(
+    nn.Linear(256, 128), 
+    nn.ReLU(),
+    nn.Linear(128, 10)
+)
+model = model.to(DEVICE)
+model.train()</p>
+<p>loss_fn = nn.CrossEntropyLoss().to(DEVICE)
+optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)
+```</p>
 <p>If you want to enable AMP mode, just add <code>self.config.enable_amp(True)</code> to the model <a href="../basics/08_nn_graph.html">nn.Graph</a>. The details of this API is at: <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.graph.graph_config.GraphConfig.enable_amp.html">enable_amp</a>.</p>
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CustomGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">loss_fn</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">enable_amp</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>    <span class="c1"># 开启 AMP 模式</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">y_pred</span>
+<p>```python
+class CustomGraph(flow.nn.Graph):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.model = model
+        self.loss_fn = loss_fn
+        self.add_optimizer(optimizer)
+        self.config.enable_amp(True)    # 开启 AMP 模式</p>
+<div class="codehilite"><pre><span></span><code>def build(self, x, y):
+    y_pred = self.model(x)
+    loss = self.loss_fn(y_pred, y)
+    loss.backward()
+    return y_pred
 </code></pre></div>
+
+<p>```</p>
 <p>Then, you can start training and other operations as usual.</p>
-<div class="highlight"><pre><span></span><code><span class="n">graph_model</span> <span class="o">=</span> <span class="n">CustomGraph</span><span class="p">()</span>
-
-<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-
-    <span class="n">graph_model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<p>```python
+graph_model = CustomGraph()</p>
+<p>for _ in range(100):
+    x = flow.randn(128, 256).to(DEVICE)
+    y = flow.ones(128, 1, dtype=flow.int64).to(DEVICE)</p>
+<div class="codehilite"><pre><span></span><code>graph_model(x, y)
 </code></pre></div>
+
+<p>```</p>
 <h2 id="gradient-scaling">Gradient Scaling<a class="headerlink" href="#gradient-scaling" title="Permanent link">&para;</a></h2>
 <p><strong>Gradient Scaling</strong> is a method for solving the problem that FP16 is prone to numerical overflow. The basic principle is to use a scale factor to scale the loss and gradient in the process of backpropagation to change the magnitude of its value, thereby mitigate numerical overflow problems as much as possible.</p>
 <p>OneFlow provides <code>GradScaler</code> to use Gradient Scaling in AMP mode. You only need to instantiate a <code>GradScaler</code> object in the <code>__init__</code> method of the nn.Graph model, and then specify it through the interface <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.Graph.set_grad_scaler.html">set_grad_scaler</a>. nn.Graph will automatically manage the whole process of Gradient Scaling. Taking the <code>CustomGraph</code> above as an example, you need to add the following code to its <code>__init__</code> method:</p>
-<div class="highlight"><pre><span></span><code><span class="n">grad_scaler</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">amp</span><span class="o">.</span><span class="n">GradScaler</span><span class="p">(</span>
-    <span class="n">init_scale</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">,</span>
-    <span class="n">growth_factor</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
-    <span class="n">backoff_factor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-    <span class="n">growth_interval</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="bp">self</span><span class="o">.</span><span class="n">set_grad_scaler</span><span class="p">(</span><span class="n">grad_scaler</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+grad_scaler = flow.amp.GradScaler(
+    init_scale=2**12,
+    growth_factor=2.0,
+    backoff_factor=0.5,
+    growth_interval=1000,
+)
+self.set_grad_scaler(grad_scaler)</code></p>
 <p>The calculation process of the scale factor and the meaning of the GradScaler parameters are as follows:</p>
 <p>The size of the scale factor is dynamically estimated in the iterative update (the initial value is specified by <code>init_scale</code>). In order to reduce the numerical underflow as much as possible, the scale factor should be larger; but if it is too large, FP16 is prone to numerical overflow , resulting in an inf or NaN. The process of dynamic estimation is to increase the scale factor as much as possible without occuring inf or NaN. At each iteration, it will check whether there is a gradient of inf or NaN:</p>
 <ol>

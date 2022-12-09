@@ -922,147 +922,136 @@
 <p>The following code runs data parallel training by configurating global tensor. </p>
 <details class="code">
 <summary>Code</summary>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
-<span class="kn">import</span> <span class="nn">flowvision</span>
-<span class="kn">import</span> <span class="nn">flowvision.transforms</span> <span class="k">as</span> <span class="nn">transforms</span>
+<p>```python
+import oneflow as flow
+import oneflow.nn as nn
+import flowvision
+import flowvision.transforms as transforms</p>
+<p>BATCH_SIZE=64
+EPOCH_NUM = 1</p>
+<p>PLACEMENT = flow.placement("cuda", [0,1])
+S0 = flow.sbp.split(0)
+B = flow.sbp.broadcast</p>
+<p>DEVICE = "cuda" if flow.cuda.is_available() else "cpu"
+print("Using {} device".format(DEVICE))</p>
+<p>training_data = flowvision.datasets.CIFAR10(
+    root="data",
+    train=True,
+    transform=transforms.ToTensor(),
+    download=True,
+)</p>
+<p>train_dataloader = flow.utils.data.DataLoader(
+    training_data, BATCH_SIZE, shuffle=True
+)</p>
+<p>model = flowvision.models.mobilenet_v2().to(DEVICE)
+model.classifer = nn.Sequential(nn.Dropout(0.2), nn.Linear(model.last_channel, 10))
+model = model.to_global(placement=PLACEMENT, sbp=B)</p>
+<p>loss_fn = nn.CrossEntropyLoss().to(DEVICE)
+optimizer = flow.optim.SGD(model.parameters(), lr=1e-3)</p>
+<p>for t in range(EPOCH_NUM):
+    print(f"Epoch {t+1}\n-------------------------------")
+    size = len(train_dataloader.dataset)
+    for batch, (x, y) in enumerate(train_dataloader):
+        x = x.to_global(placement=PLACEMENT, sbp=S0)
+        y = y.to_global(placement=PLACEMENT, sbp=S0)</p>
+<div class="codehilite"><pre><span></span><code>    # Compute prediction error
+    pred = model(x)
+    loss = loss_fn(pred, y)
 
-<span class="n">BATCH_SIZE</span><span class="o">=</span><span class="mi">64</span>
-<span class="n">EPOCH_NUM</span> <span class="o">=</span> <span class="mi">1</span>
+    # Backpropagation
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
 
-<span class="n">PLACEMENT</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">S0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">B</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
-
-<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using </span><span class="si">{}</span><span class="s2"> device&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">))</span>
-
-<span class="n">training_data</span> <span class="o">=</span> <span class="n">flowvision</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">CIFAR10</span><span class="p">(</span>
-    <span class="n">root</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span>
-    <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">transform</span><span class="o">=</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
-    <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
-    <span class="n">training_data</span><span class="p">,</span> <span class="n">BATCH_SIZE</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span>
-<span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">flowvision</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">mobilenet_v2</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">classifer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.2</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">last_channel</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">PLACEMENT</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">B</span><span class="p">)</span>
-
-<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">EPOCH_NUM</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="se">\n</span><span class="s2">-------------------------------&quot;</span><span class="p">)</span>
-    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">train_dataloader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">batch</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">PLACEMENT</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">S0</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">PLACEMENT</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">S0</span><span class="p">)</span>
-
-        <span class="c1"># Compute prediction error</span>
-        <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
-        <span class="c1"># Backpropagation</span>
-        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
-        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-
-        <span class="n">current</span> <span class="o">=</span> <span class="n">batch</span> <span class="o">*</span> <span class="n">BATCH_SIZE</span>
-        <span class="k">if</span> <span class="n">batch</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">&gt;7f</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">current</span><span class="si">:</span><span class="s2">&gt;5d</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">size</span><span class="si">:</span><span class="s2">&gt;5d</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+    current = batch * BATCH_SIZE
+    if batch % 5 == 0:
+        print(f&quot;loss: {loss:&gt;7f}  [{current:&gt;5d}/{size:&gt;5d}]&quot;)
 </code></pre></div>
+
+<p>```</p>
 </details>
 <p>We can see that this script is almost identical to the training script for the single-machine and single-device configuration, with a few exceptions on some lines related to consitent tensor set-ups. These codes are:</p>
 <ul>
 <li>Set placement to place the training one GPU 0 and 1: </li>
 </ul>
-<div class="highlight"><pre><span></span><code>    <span class="n">PLACEMENT</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
-</code></pre></div>
+<p><code>python
+    PLACEMENT = flow.placement("cuda", [0,1])</code></p>
 <ul>
 <li>Broadcast the model on clusters:</li>
 </ul>
-<div class="highlight"><pre><span></span><code>    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">PLACEMENT</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">B</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+    model = model.to_global(placement=PLACEMENT, sbp=B)</code></p>
 <ul>
 <li>Split the data on cluster with <code>split(0)</code>: </li>
 </ul>
-<div class="highlight"><pre><span></span><code>    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">PLACEMENT</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">S0</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">PLACEMENT</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">S0</span><span class="p">)</span>
-</code></pre></div>
+<p><code>python
+    x = x.to_global(placement=PLACEMENT, sbp=S0)
+    y = y.to_global(placement=PLACEMENT, sbp=S0)</code></p>
 <p>This allows us to follow the instructions in <a href="01_introduction.html">Common Distributed Parallel Strategies</a></p>
 <h2 id="run-data-parallel-training-with-distributeddataparallel">Run Data Parallel Training With DistributedDataParallel<a class="headerlink" href="#run-data-parallel-training-with-distributeddataparallel" title="Permanent link">&para;</a></h2>
 <p>The following codes provides a quick start for training data parallel with <code>oneflow.nn.parallel.DistributedDataParallel</code> :</p>
-<div class="highlight"><pre><span></span><code>wget https://docs.oneflow.org/master/code/parallelism/ddp_train.py <span class="c1">#Download</span>
-python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">2</span> ./ddp_train.py <span class="c1">#data parallel training</span>
-</code></pre></div>
+<p><code>shell
+wget https://docs.oneflow.org/master/code/parallelism/ddp_train.py #Download
+python3 -m oneflow.distributed.launch --nproc_per_node 2 ./ddp_train.py #data parallel training</code></p>
 <p>Out：</p>
-<div class="highlight"><pre><span></span><code>50/500 loss:0.004111831542104483
+<p>```text
+50/500 loss:0.004111831542104483
 50/500 loss:0.00025336415274068713
 ...
 500/500 loss:6.184563972055912e-11
-500/500 loss:4.547473508864641e-12
-
-w:tensor([[2.0000],
-        [3.0000]], device=&#39;cuda:1&#39;, dtype=oneflow.float32,
-       grad_fn=&lt;accumulate_grad&gt;)
-
-w:tensor([[2.0000],
-        [3.0000]], device=&#39;cuda:0&#39;, dtype=oneflow.float32,
-       grad_fn=&lt;accumulate_grad&gt;)
-</code></pre></div>
+500/500 loss:4.547473508864641e-12</p>
+<p>w:tensor([[2.0000],
+        [3.0000]], device='cuda:1', dtype=oneflow.float32,
+       grad_fn=<accumulate_grad>)</p>
+<p>w:tensor([[2.0000],
+        [3.0000]], device='cuda:0', dtype=oneflow.float32,
+       grad_fn=<accumulate_grad>)
+```</p>
 <p>Click "Code" below to expand the code of the above running script.</p>
 <details class="code">
 <summary>Code</summary>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
-<span class="kn">from</span> <span class="nn">oneflow.nn.parallel</span> <span class="kn">import</span> <span class="n">DistributedDataParallel</span> <span class="k">as</span> <span class="n">ddp</span>
-
-<span class="n">train_x</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-<span class="p">]</span>
-<span class="n">train_y</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">13</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-    <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">26</span><span class="p">],</span> <span class="p">[</span><span class="mi">9</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-<span class="p">]</span>
-
-
-<span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="mf">0.01</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">iter_count</span> <span class="o">=</span> <span class="mi">500</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">x</span>
-
-
-<span class="n">m</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-<span class="n">m</span> <span class="o">=</span> <span class="n">ddp</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
-<span class="n">loss</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
-<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">m</span><span class="o">.</span><span class="n">lr</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">iter_count</span><span class="p">):</span>
-    <span class="n">rank</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">get_rank</span><span class="p">()</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">train_x</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">train_y</span><span class="p">[</span><span class="n">rank</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
-
-    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">m</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="n">l</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">iter_count</span><span class="si">}</span><span class="s2"> loss:</span><span class="si">{</span><span class="n">l</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
-    <span class="n">l</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">w:</span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">w</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<p>```python
+import oneflow as flow
+from oneflow.nn.parallel import DistributedDataParallel as ddp</p>
+<p>train_x = [
+    flow.tensor([[1, 2], [2, 3]], dtype=flow.float32),
+    flow.tensor([[4, 6], [3, 1]], dtype=flow.float32),
+]
+train_y = [
+    flow.tensor([[8], [13]], dtype=flow.float32),
+    flow.tensor([[26], [9]], dtype=flow.float32),
+]</p>
+<p>class Model(flow.nn.Module):
+    def <strong>init</strong>(self):
+        super().<strong>init</strong>()
+        self.lr = 0.01
+        self.iter_count = 500
+        self.w = flow.nn.Parameter(flow.tensor([[0], [0]], dtype=flow.float32))</p>
+<div class="codehilite"><pre><span></span><code>def forward(self, x):
+    x = flow.matmul(x, self.w)
+    return x
 </code></pre></div>
+
+<p>m = Model().to("cuda")
+m = ddp(m)
+loss = flow.nn.MSELoss(reduction="sum")
+optimizer = flow.optim.SGD(m.parameters(), m.lr)</p>
+<p>for i in range(0, m.iter_count):
+    rank = flow.env.get_rank()
+    x = train_x[rank].to("cuda")
+    y = train_y[rank].to("cuda")</p>
+<div class="codehilite"><pre><span></span><code>y_pred = m(x)
+l = loss(y_pred, y)
+if (i + 1) % 50 == 0:
+    print(f&quot;{i+1}/{m.iter_count} loss:{l}&quot;)
+
+optimizer.zero_grad()
+l.backward()
+optimizer.step()
+</code></pre></div>
+
+<p>print(f"\nw:{m.w}")
+```</p>
 </details>
 <p>There are only two differences between the data parallelism training code and the stand-alone single-card script:</p>
 <ul>
@@ -1070,8 +1059,8 @@ w:tensor([[2.0000],
 <li>Use <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.env.get_rank.html">get_rank</a> to get the current device number and distribute the data to the device.</li>
 </ul>
 <p>Then use <code>launcher</code> to run the script, leave everything else to OneFlow, which makes distributed training as simple as stand-alone single-card training:</p>
-<div class="highlight"><pre><span></span><code><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">oneflow</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">launch</span> <span class="o">--</span><span class="n">nproc_per_node</span> <span class="mi">2</span> <span class="o">./</span><span class="n">ddp_train</span><span class="o">.</span><span class="n">py</span>
-</code></pre></div>
+<p><code>python
+python3 -m oneflow.distributed.launch --nproc_per_node 2 ./ddp_train.py</code></p>
 <h3 id="distributedsampler">DistributedSampler<a class="headerlink" href="#distributedsampler" title="Permanent link">&para;</a></h3>
 <p>The data used is manually distributed in this context to highlight <code>DistributedDataParallel</code>. However, in practical applications, you can directly use <a href="https://oneflow.readthedocs.io/en/v0.8.1/utils.data.html?highlight=DistributedSampler#oneflow.utils.data.distributed.DistributedSampler">DistributedSampler</a> with data parallel.</p>
 <p><code>DistributedSampler</code> will instantiate the Dataloader in each process, and each Dataloader instance will load a part of the complete data to automatically complete the data distribution.</p>
