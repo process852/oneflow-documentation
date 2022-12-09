@@ -990,17 +990,19 @@
 <p>We will first introduce the basic concepts of the computation graph, which are conducive to understand the common settings and limitations of Oneflow's automatic differentiation. Then we will introduce OneFlow's common automatic differentiation interfaces.</p>
 <h2 id="computation-graph">Computation Graph<a class="headerlink" href="#computation-graph" title="Permanent link">&para;</a></h2>
 <p>Computation graphs are composed of tensors and operators. We show this in code as below:</p>
-<p>```python
-import oneflow as flow</p>
-<p>def loss(y_pred, y):
-    return flow.sum(&frac12;*(y_pred-y)**2)</p>
-<p>x = flow.ones(1, 5)  # input【不确定】
-w = flow.randn(5, 3, requires_grad=True)
-b = flow.randn(1, 3, requires_grad=True)
-z = flow.matmul(x, w) + b</p>
-<p>y = flow.zeros(1, 3)  # label
-l = loss(z,y)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">flow</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">y_pred</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># input【不确定】</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span>
+
+<span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># label</span>
+<span class="n">l</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">z</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+</code></pre></div>
 <p>Corresponding computation graph：</p>
 <p><img alt="todo" src="imgs/compute_graph.png" /></p>
 <p>In computation graph, the nodes only with output and with no input called leaf node, like <code>x</code>, <code>w</code>, <code>b</code>, and <code>y</code>, the nodes only with output and with no input called root node, like <code>loss</code>.</p>
@@ -1008,114 +1010,115 @@ l = loss(z,y)
 <h2 id="automatic-gradient">Automatic Gradient<a class="headerlink" href="#automatic-gradient" title="Permanent link">&para;</a></h2>
 <h3 id="backward-and-gradient"><code>backward()</code> and Gradient<a class="headerlink" href="#backward-and-gradient" title="Permanent link">&para;</a></h3>
 <p>During the backpropagation process, we need to get the gradients of <code>l</code> to <code>w</code>,<code>b</code> respectively, shown as <span class="arithmatex">\(\frac{\partial l}{\partial w}\)</span> and <span class="arithmatex">\(\frac{\partial l}{\partial b}\)</span>. We only need to call the 'backward()' method of <code>l</code>, and then OneFlow will automatically calculate the gradients and store them in the <code>w.grad</code> and <code>b.grad</code>.</p>
-<p><code>python
-l.backward()
-print(w.grad)
-print(b.grad)</code></p>
-<p><code>text
-tensor([[0.9397, 2.5428, 2.5377],
+<div class="highlight"><pre><span></span><code><span class="n">l</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>tensor([[0.9397, 2.5428, 2.5377],
         [0.9397, 2.5428, 2.5377],
         [0.9397, 2.5428, 2.5377],
         [0.9397, 2.5428, 2.5377],
         [0.9397, 2.5428, 2.5377]], dtype=oneflow.float32)
-tensor([[0.9397, 2.5428, 2.5377]], dtype=oneflow.float32)</code></p>
+tensor([[0.9397, 2.5428, 2.5377]], dtype=oneflow.float32)
+</code></pre></div>
 <h3 id="gradient-for-non-leaf-nodes">Gradient for Non-leaf Nodes<a class="headerlink" href="#gradient-for-non-leaf-nodes" title="Permanent link">&para;</a></h3>
 <p>By default, only gradients of leaf nodes with <code>requires_grad=True</code> will be retained. The 'grad' of a non-leaf node is automatically freed during the calling of 'backward' and cannot be viewed.</p>
 <p><code>Tensor.retain_grad()</code> can be called to retain and view the 'grad' of a non-leaf node.</p>
-<p>```python
-from math import pi
-n1 = flow.tensor(pi/2, requires_grad=True)
-n2 = flow.sin(n1)
-n2.retain_grad()
-n3 = flow.pow(n2, 2)</p>
-<p>n3.backward()
-print(n1.grad)
-print(n2.grad)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="n">n1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">n2</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">n1</span><span class="p">)</span>
+<span class="n">n2</span><span class="o">.</span><span class="n">retain_grad</span><span class="p">()</span>
+<span class="n">n3</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">n3</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n1</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n2</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+</code></pre></div>
 <p>we get <span class="arithmatex">\(\frac{\partial n_3}{\partial n_1}\)</span> and <span class="arithmatex">\(\frac{\partial n_3}{\partial n_2}\)</span> using the code above.</p>
 <p>Output:</p>
-<p><code>tensor(-8.7423e-08, dtype=oneflow.float32)
-tensor(2., dtype=oneflow.float32)</code></p>
+<div class="highlight"><pre><span></span><code>tensor(-8.7423e-08, dtype=oneflow.float32)
+tensor(2., dtype=oneflow.float32)
+</code></pre></div>
 <h3 id="call-backward-multiple-times-on-a-computation-graph">Call <code>backward()</code> Multiple Times on a Computation Graph<a class="headerlink" href="#call-backward-multiple-times-on-a-computation-graph" title="Permanent link">&para;</a></h3>
 <p>By default, we can only call <code>backward()</code> once for each computation graph. For example, the following code will raise an error:</p>
-<p><code>python
-n1 = flow.tensor(10., requires_grad=True)
-n2 = flow.pow(n1, 2)
-n2.backward()
-n2.backward()</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">n1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">n2</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">n2</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">n2</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+</code></pre></div>
 <p>Error message:</p>
 <blockquote>
 <p>Maybe you try to backward through the node a second time. Specify retain_graph=True when calling .backward() or autograd.grad() the first time.</p>
 </blockquote>
 <p>If we need to call <code>backward()</code> multiple times on the same computation graph, <code>retain_graph</code> needs to be <code>True</code>.</p>
-<p>```python
-n1 = flow.tensor(10., requires_grad=True)
-n2 = flow.pow(n1, 2)</p>
-<p>n2.backward(retain_graph=True)
-print(n1.grad)
-n2.backward()
-print(n1.grad)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">n1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">n2</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">n2</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n1</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="n">n2</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n1</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+</code></pre></div>
 <p>Output：</p>
-<p><code>text
-tensor(20., dtype=oneflow.float32)
-tensor(40., dtype=oneflow.float32)</code></p>
+<div class="highlight"><pre><span></span><code>tensor(20., dtype=oneflow.float32)
+tensor(40., dtype=oneflow.float32)
+</code></pre></div>
 <p>The above output shows that OneFlow will <strong>accumulate</strong> the gradient calculated by <code>backward()</code> multiple times.
 By calling the <code>zero_()</code>, we can clear the gradient:</p>
-<p>```python
-n1 = flow.tensor(10., requires_grad=True)
-n2 = flow.pow(n1, 2)</p>
-<p>n2.backward(retain_graph=True)
-print(n1.grad)
-n1.grad.zero_()
-n2.backward()
-print(n1.grad)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">n1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">n2</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">n2</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n1</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="n">n1</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">zero_</span><span class="p">()</span>
+<span class="n">n2</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">n1</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+</code></pre></div>
 <p>Output：</p>
-<p><code>text
+<div class="highlight"><pre><span></span><code>tensor(20., dtype=oneflow.float32)
 tensor(20., dtype=oneflow.float32)
-tensor(20., dtype=oneflow.float32)</code></p>
+</code></pre></div>
 <h3 id="disabled-gradient-calculation">Disabled Gradient Calculation<a class="headerlink" href="#disabled-gradient-calculation" title="Permanent link">&para;</a></h3>
 <p>By default, OneFlow will trace and calculate gradients of Tensors with <code>requires_grad = Ture</code>.
 However, in some cases, we don't need OneFlow to keep tracing gradients such as just wanting the forward pass for inference. Then we can use <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.no_grad.html">oneflow.no_grad</a> or <a href="https://oneflow.readthedocs.io/en/master/generated/oneflow.Tensor.detach.html#oneflow.Tensor.detach">oneflow.Tensor.detach</a> to set.</p>
-<p>```python
-z = flow.matmul(x, w)+b
-print(z.requires_grad)</p>
-<p>with flow.no_grad():
-    z = flow.matmul(x, w)+b
-print(z.requires_grad)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">z</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span><span class="o">+</span><span class="n">b</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">flow</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span><span class="o">+</span><span class="n">b</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
+</code></pre></div>
 <p>Output：</p>
-<p><code>text
-True
-False</code></p>
-<p><code>python
-z_det = z.detach()
-print(z_det.requires_grad)</code></p>
+<div class="highlight"><pre><span></span><code>True
+False
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">z_det</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">z_det</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
+</code></pre></div>
 <p>Output：</p>
-<p><code>text
-False</code></p>
+<div class="highlight"><pre><span></span><code>False
+</code></pre></div>
 <h3 id="gradients-for-non-scalar-outputs">Gradients for Non-Scalar Outputs<a class="headerlink" href="#gradients-for-non-scalar-outputs" title="Permanent link">&para;</a></h3>
 <p>Usually, we call <code>backward()</code> on scalar <code>loss</code>.</p>
 <p>However, if <code>loss</code> is a tensor, an error will be raised when calling <code>backward()</code> on <code>loss</code>.</p>
-<p><code>python
-x = flow.randn(1, 2, requires_grad=True)
-y = 3*x + 1
-y.backward()</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+</code></pre></div>
 <p>Error message：</p>
 <blockquote>
 <p>Check failed: IsScalarTensor(*outputs.at(i)) Grad can be implicitly created only for scalar outputs</p>
 </blockquote>
 <p>We can get the gradient after <code>y.sum()</code>.</p>
-<p><code>python
-x = flow.randn(1, 2, requires_grad=True)
-y = 3*x + 1
-y = y.sum()
-y.backward()
-print(x.grad)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+</code></pre></div>
 <p>Output：</p>
-<p><code>text
-tensor([[3., 3.]], dtype=oneflow.float32)</code></p>
+<div class="highlight"><pre><span></span><code>tensor([[3., 3.]], dtype=oneflow.float32)
+</code></pre></div>
 <p>Please refer to the "Further Reading" section below for the analysis of the cause and solution of the error.</p>
 <h2 id="further-reading">Further Reading<a class="headerlink" href="#further-reading" title="Permanent link">&para;</a></h2>
 <p>There are two elements <span class="arithmatex">\(x_1\)</span> and <span class="arithmatex">\(x_2\)</span> in Tensor <code>x</code>, and two elements <span class="arithmatex">\(y_1\)</span> and <span class="arithmatex">\(y_2\)</span> in Tensor <code>y</code>. The relationship between them is:</p>
@@ -1175,14 +1178,14 @@ v_2 \frac{\partial y_2}{\partial x_2}
 \]</div>
 <p>If the vector <span class="arithmatex">\(\mathbf{v}\)</span> is the gradient of the upper layer in the backpropagation, the result of VJP is exactly the gradient required by the current layer.</p>
 <p><code>backward()</code> can accept a tensor as a parameter, when the parameter is <span class="arithmatex">\(\mathbf{v}\)</span> in VJP. We can also use the following methods to find the gradient of a tensor:</p>
-<p><code>python
-x = flow.randn(1, 2, requires_grad=True)
-y = 3*x + 1
-y.backward(flow.ones_like(y))
-print(x.grad)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+</code></pre></div>
 <p>Output：</p>
-<p><code>text
-tensor([[3., 3.]], dtype=oneflow.float32)</code></p>
+<div class="highlight"><pre><span></span><code>tensor([[3., 3.]], dtype=oneflow.float32)
+</code></pre></div>
 <p><strong>External links</strong></p>
 <ul>
 <li><a href="http://www.cs.toronto.edu/~rgrosse/courses/csc421_2019/slides/lec06.pdf">Automatic Differentiation</a></li>

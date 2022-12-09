@@ -735,6 +735,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#onnx_3" class="md-nav__link">
+    使用 ONNX 模型进行推理
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -998,6 +1005,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#onnx_3" class="md-nav__link">
+    使用 ONNX 模型进行推理
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1044,19 +1058,19 @@
 <p><a href="https://github.com/Oneflow-Inc/oneflow_convert">oneflow-onnx</a> 是 OneFlow 团队提供的模型转换工具，支持将 OneFlow 静态图模型导出为 ONNX 模型。目前 oneflow-onnx 支持 80 多种 OneFlow OP 导出为 ONNX OP，具体可参见：<a href="https://github.com/Oneflow-Inc/oneflow_convert/blob/main/docs/oneflow2onnx/op_list.md">OneFlow2ONNX 支持的OP列表</a>。</p>
 <h3 id="oneflow-onnx_2">安装 oneflow-onnx<a class="headerlink" href="#oneflow-onnx_2" title="Permanent link">&para;</a></h3>
 <p>oneflow-onnx 独立于 OneFlow，需要单独通过 pip 安装：
-<code>bash
-pip install oneflow-onnx</code></p>
+<div class="highlight"><pre><span></span><code>pip install oneflow-onnx
+</code></pre></div></p>
 <h3 id="oneflow-onnx_3">oneflow-onnx 的使用方法<a class="headerlink" href="#oneflow-onnx_3" title="Permanent link">&para;</a></h3>
 <p>要将 OneFlow 静态图模型导出为 ONNX 模型，只需调用 <code>export_onnx_model</code> 函数。</p>
-<p>```python
-from oneflow_onnx.oneflow2onnx.util import export_onnx_model</p>
-<p>export_onnx_model(graph,
-                  external_data=False, 
-                  opset=None, 
-                  flow_weight_dir=None, 
-                  onnx_model_path="/tmp", 
-                  dynamic_batch_size=False)
-```
+<p><div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">oneflow_onnx.oneflow2onnx.util</span> <span class="kn">import</span> <span class="n">export_onnx_model</span>
+
+<span class="n">export_onnx_model</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span>
+                  <span class="n">external_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                  <span class="n">opset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                  <span class="n">flow_weight_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                  <span class="n">onnx_model_path</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> 
+                  <span class="n">dynamic_batch_size</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 各参数的含义如下:</p>
 <ol>
 <li>
@@ -1079,10 +1093,11 @@ from oneflow_onnx.oneflow2onnx.util import export_onnx_model</p>
 </li>
 </ol>
 <p>另外，oneflow-onnx 还提供了一个名为 <code>convert_to_onnx_and_check</code> 的函数，用于转换并检查转换出的 ONNX 模型。其中的检查指的是将同样的输入分别送入原本的 OneFlow 模型和转换后的 ONNX 模型，然后比较两个输出中对应的每个数值之差是否在合理的误差范围内。</p>
-<p>```python
-from oneflow_onnx.oneflow2onnx.util import convert_to_onnx_and_check</p>
-<p>convert_to_onnx_and_check(...)
-<code>``</code>convert_to_onnx_and_check<code>函数的参数是</code>export_onnx_model<code>函数的参数的超集，可以额外传入</code>print_outlier=True` 来输出检查过程中发现的超出合理误差范围内的异常值。</p>
+<p><div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">oneflow_onnx.oneflow2onnx.util</span> <span class="kn">import</span> <span class="n">convert_to_onnx_and_check</span>
+
+<span class="n">convert_to_onnx_and_check</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div>
+<code>convert_to_onnx_and_check</code> 函数的参数是 <code>export_onnx_model</code> 函数的参数的超集，可以额外传入 <code>print_outlier=True</code> 来输出检查过程中发现的超出合理误差范围内的异常值。</p>
 <h3 id="_1">导出模型时的注意点<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>在导出模型之前，需要将模型设置成 eval 模式，因为 Dropout、Batch Normalization 等操作在训练和推理模型下的行为不同</li>
@@ -1095,47 +1110,48 @@ from oneflow_onnx.oneflow2onnx.util import convert_to_onnx_and_check</p>
 <p>下面的代码中使用到了 <a href="https://github.com/Oneflow-Inc/vision">FlowVision</a>，它是基于 OneFlow 搭建的、专用于计算机视觉任务的工具库，包含诸多模型、数据增强方法、数据变换操作、数据集等。我们在此直接使用 FlowVision 库提供的 ResNet-34 模型，并使用 FlowVision 提供的在 ImageNet 数据集上训练得到的 ResNet-34 权重。</p>
 <h3 id="onnx_2">导出为 ONNX 模型<a class="headerlink" href="#onnx_2" title="Permanent link">&para;</a></h3>
 <p>导入相关依赖，为方便演示，直接使用 <code>resnet34</code> 的预训练模型：
-```python
-import oneflow as flow
-from oneflow import nn
-from flowvision.models import resnet34
-from oneflow_onnx.oneflow2onnx.util import convert_to_onnx_and_check</p>
-<h1 id="_3">模型参数存储目录<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h1>
-<p>MODEL_PARAMS = 'checkpoints/resnet34'</p>
-<h1 id="_4">下载预训练模型并保存<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h1>
-<p>model = resnet34(pretrained=True)
-flow.save(model.state_dict(), MODEL_PARAMS)
-```</p>
-<p>使用动态图模型构建静态图模型，详情请参见：<a href="../basics/08_nn_graph.html">静态图模块 nn.Graph</a></p>
-<p>```python
-class ResNet34Graph(nn.Graph):
-    def <strong>init</strong>(self, eager_model):
-        super().<strong>init</strong>()
-        self.model = eager_model</p>
-<div class="codehilite"><pre><span></span><code>def build(self, x):
-    return self.model(x)
-</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="kn">from</span> <span class="nn">oneflow</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">flowvision.models</span> <span class="kn">import</span> <span class="n">resnet34</span>
+<span class="kn">from</span> <span class="nn">oneflow_onnx.oneflow2onnx.util</span> <span class="kn">import</span> <span class="n">convert_to_onnx_and_check</span>
 
-<p>```</p>
+<span class="c1"># 模型参数存储目录</span>
+<span class="n">MODEL_PARAMS</span> <span class="o">=</span> <span class="s1">&#39;checkpoints/resnet34&#39;</span>
+
+<span class="c1"># 下载预训练模型并保存</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">resnet34</span><span class="p">(</span><span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">flow</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">MODEL_PARAMS</span><span class="p">)</span>
+</code></pre></div></p>
+<p>使用动态图模型构建静态图模型，详情请参见：<a href="../basics/08_nn_graph.html">静态图模块 nn.Graph</a></p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ResNet34Graph</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eager_model</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">eager_model</span>
+
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div>
 <p>将 OneFlow 静态图模型导出为 ONNX 模型：
-```python
-params = flow.load(MODEL_PARAMS)
-model = resnet34()
-model.load_state_dict(params)</p>
-<h1 id="eval">将模型设置为 eval 模式<a class="headerlink" href="#eval" title="Permanent link">&para;</a></h1>
-<p>model.eval()</p>
-<p>resnet34_graph = ResNet34Graph(model)</p>
-<h1 id="_5">构建出静态图模型<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h1>
-<p>resnet34_graph._compile(flow.randn(1, 3, 224, 224))</p>
-<h1 id="onnx_3">导出为 ONNX 模型并进行检查<a class="headerlink" href="#onnx_3" title="Permanent link">&para;</a></h1>
-<p>convert_to_onnx_and_check(resnet34_graph, 
-                          flow_weight_dir=MODEL_PARAMS, 
-                          onnx_model_path="./", 
-                          print_outlier=True,
-                          dynamic_batch_size=True)
-<code>``
-运行完毕后，可以在当前目录中找到名为</code>model.onnx` 的文件，即导出的 ONNX 模型。</p>
-<h3 id="onnx_4">使用 ONNX 模型进行推理<a class="headerlink" href="#onnx_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="n">params</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">MODEL_PARAMS</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">resnet34</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<span class="c1"># 将模型设置为 eval 模式</span>
+<span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+<span class="n">resnet34_graph</span> <span class="o">=</span> <span class="n">ResNet34Graph</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="c1"># 构建出静态图模型</span>
+<span class="n">resnet34_graph</span><span class="o">.</span><span class="n">_compile</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">))</span>
+
+<span class="c1"># 导出为 ONNX 模型并进行检查</span>
+<span class="n">convert_to_onnx_and_check</span><span class="p">(</span><span class="n">resnet34_graph</span><span class="p">,</span> 
+                          <span class="n">flow_weight_dir</span><span class="o">=</span><span class="n">MODEL_PARAMS</span><span class="p">,</span> 
+                          <span class="n">onnx_model_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span> 
+                          <span class="n">print_outlier</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                          <span class="n">dynamic_batch_size</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+运行完毕后，可以在当前目录中找到名为 <code>model.onnx</code> 的文件，即导出的 ONNX 模型。</p>
+<h3 id="onnx_3">使用 ONNX 模型进行推理<a class="headerlink" href="#onnx_3" title="Permanent link">&para;</a></h3>
 <p>进行推理之前，要保证已经安装了 ONNX Runtime, 即 onnxruntime 或 onnxruntime-gpu。在本教程的实验环境中，安装的是 onnxruntime-gpu 以调用 GPU 进行计算，但如果机器上没有 GPU，也可以指定使用 CPU 进行计算，详见下文。</p>
 <p>我们使用下面这张图像作为模型的输入：</p>
 <div align="center">
@@ -1143,59 +1159,59 @@ model.load_state_dict(params)</p>
 </div>
 
 <p>导入依赖：
-<code>python
-import numpy as np
-import cv2
-from onnxruntime import InferenceSession</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">from</span> <span class="nn">onnxruntime</span> <span class="kn">import</span> <span class="n">InferenceSession</span>
+</code></pre></div></p>
 <p>定义一个函数用于将图像预处理为 ONNX 模型所接受的格式和尺寸：
-```python
-def preprocess_image(img, input_hw = (224, 224)):
-    h, w, _ = img.shape</p>
-<div class="codehilite"><pre><span></span><code># 使用图像的较长边确定缩放系数
-is_wider = True if h &lt;= w else False
-scale = input_hw[1] / w if is_wider else input_hw[0] / h
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">preprocess_image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">input_hw</span> <span class="o">=</span> <span class="p">(</span><span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">)):</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span>
 
-# 对图像进行等比例缩放
-processed_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
-# 归一化
-processed_img = np.array(processed_img, dtype=np.float32) / 255
+    <span class="c1"># 使用图像的较长边确定缩放系数</span>
+    <span class="n">is_wider</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">h</span> <span class="o">&lt;=</span> <span class="n">w</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">input_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">w</span> <span class="k">if</span> <span class="n">is_wider</span> <span class="k">else</span> <span class="n">input_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">h</span>
 
-# 将图像填充到 ONNX 模型预设尺寸
-temp_img = np.zeros((input_hw[0], input_hw[1], 3), dtype=np.float32)
-temp_img[:processed_img.shape[0], :processed_img.shape[1], :] = processed_img
-processed_img = temp_img
+    <span class="c1"># 对图像进行等比例缩放</span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fx</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">fy</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">INTER_LINEAR</span><span class="p">)</span>
+    <span class="c1"># 归一化</span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">processed_img</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
 
-# 调整轴的顺序并在最前面添加 batch 轴  
-processed_img = np.expand_dims(processed_img.transpose(2, 0, 1), axis=0)
+    <span class="c1"># 将图像填充到 ONNX 模型预设尺寸</span>
+    <span class="n">temp_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">input_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">input_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">temp_img</span><span class="p">[:</span><span class="n">processed_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">processed_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">processed_img</span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">temp_img</span>
 
-return processed_img
-</code></pre></div>
+    <span class="c1"># 调整轴的顺序并在最前面添加 batch 轴  </span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">processed_img</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-<p>```</p>
+    <span class="k">return</span> <span class="n">processed_img</span>
+</code></pre></div></p>
 <p>接下来，使用 ONNX 模型进行推理，主要步骤包括：创建一个 InferenceSession 对象，然后调用其 <code>run</code> 方法进行推理。</p>
 <p>在 onnxruntime(-gpu) 1.9 及以上版本中，创建 InferenceSession 对象时需要显式指定 <code>providers</code> 参数来选择使用的硬件。对于 onnxruntime-gpu，可以指定的值包括 <code>TensorrtExecutionProvider</code>、<code>CUDAExecutionProvider</code>、<code>CPUExecutionProvider</code>。如果运行的机器上没有 GPU，可以将 <code>providers</code> 参数指定为 <code>['CPUExecutionProvider']</code> 来使用 CPU 进行计算。</p>
 <p>ONNX 模型的输入数据的类型是一个 dict，其 keys 为导出 ONNX 模型时的输入名称 "input names"，values 为 NumPy 数组类型的实际输入数据。可以通过 InferenceSession 对象的 <code>get_inputs</code> 方法获取"input names"，该方法的返回值是 <code>onnxruntime.NodeArg</code> 类型的对象组成的 list，对于 NodeArg 对象，可使用其 <code>name</code> 属性获取 str 类型的名称。在本教程中，输入只有图像数据本身，因此可以通过在 InferenceSession 对象上调用 <code>.get_inputs()[0].name</code>，获取输入对应的 "input names"，其值为 <code>_ResNet34Graph_0-input_0/out</code>，将此值作为 key 构造输入 ONNX 模型的 dict。当然，也可以不预先指定，而在运行时动态获取。</p>
-<p>```python</p>
-<h1 id="imagenet">从文件中读取 ImageNet 数据集的类别名称<a class="headerlink" href="#imagenet" title="Permanent link">&para;</a></h1>
-<p>with open('ImageNet-Class-Names.txt') as f:
-    CLASS_NAMES = f.readlines()</p>
-<h1 id="preprocess_image">读取图像文件并使用 <code>preprocess_image</code> 函数进行预处理<a class="headerlink" href="#preprocess_image" title="Permanent link">&para;</a></h1>
-<p>img = cv2.imread('cat.jpg', cv2.IMREAD_COLOR)
-img = preprocess_image(img)</p>
-<h1 id="inferencesession">创建一个 InferenceSession 对象<a class="headerlink" href="#inferencesession" title="Permanent link">&para;</a></h1>
-<p>ort_sess = InferenceSession('model.onnx', providers=['TensorrtExecutionProvider',
-                                                     'CUDAExecutionProvider',
-                                                     'CPUExecutionProvider'])</p>
-<h1 id="inferencesession-run">调用 InferenceSession 对象的 <code>run</code> 方法进行推理<a class="headerlink" href="#inferencesession-run" title="Permanent link">&para;</a></h1>
-<p>results = ort_sess.run(None, {"_ResNet34Graph_0-input_0/out": img})</p>
-<h1 id="_6">输出推理结果<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h1>
-<p>print(CLASS_NAMES[np.argmax(results[0])])
-```</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 从文件中读取 ImageNet 数据集的类别名称</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;ImageNet-Class-Names.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">CLASS_NAMES</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+<span class="c1"># 读取图像文件并使用 `preprocess_image` 函数进行预处理</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s1">&#39;cat.jpg&#39;</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">IMREAD_COLOR</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">preprocess_image</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+<span class="c1"># 创建一个 InferenceSession 对象</span>
+<span class="n">ort_sess</span> <span class="o">=</span> <span class="n">InferenceSession</span><span class="p">(</span><span class="s1">&#39;model.onnx&#39;</span><span class="p">,</span> <span class="n">providers</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;TensorrtExecutionProvider&#39;</span><span class="p">,</span>
+                                                     <span class="s1">&#39;CUDAExecutionProvider&#39;</span><span class="p">,</span>
+                                                     <span class="s1">&#39;CPUExecutionProvider&#39;</span><span class="p">])</span>
+<span class="c1"># 调用 InferenceSession 对象的 `run` 方法进行推理</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">ort_sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;_ResNet34Graph_0-input_0/out&quot;</span><span class="p">:</span> <span class="n">img</span><span class="p">})</span>
+
+<span class="c1"># 输出推理结果</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">CLASS_NAMES</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+</code></pre></div>
 <p>InferenceSession 对象的 <code>run</code> 方法的输出是 NumPy 数组构成的 list，每个 NumPy 数组对应一组输出。因为只有一组输入，所以取出索引为 0 的元素作为输出，此元素的形状是 <code>(1, 1000)</code>，对应于 1000 个类别的概率 (如果将 n 张图像作为一个 batch 输入，此元素的形状将是 <code>(n, 1000)</code>)。通过 <code>np.argmax</code> 获取概率最大的类别对应的索引后，将索引映射为类别名称。</p>
 <p>运行以上代码，得到：
-<code>text
-(base) root@training-notebook-654c6f-654c6f-jupyter-master-0:/workspace# python infer.py 
-285: 'Egyptian cat',</code></p>
+<div class="highlight"><pre><span></span><code>(base) root@training-notebook-654c6f-654c6f-jupyter-master-0:/workspace# python infer.py 
+285: &#39;Egyptian cat&#39;,
+</code></pre></div></p>
 <p>以上是在 Python 环境中使用 GPU 或 CPU 进行推理，实际使用时可以根据部署环境选择不同的 ONNX Runtime 来使用导出的 ONNX 模型。</p>
                 
               

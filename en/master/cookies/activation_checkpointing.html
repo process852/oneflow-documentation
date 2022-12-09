@@ -908,65 +908,66 @@
 <p>OneFlow's static graph module <code>nn.Graph</code> already supports Activation Checkpointing. This article will introduce how to turn on it during training.</p>
 <h2 id="example-of-using-activation-checkpointing">Example of using Activation Checkpointing<a class="headerlink" href="#example-of-using-activation-checkpointing" title="Permanent link">&para;</a></h2>
 <p>First, we define a simple model consist of loss function and optimizer in exactly the same way as before.</p>
-<p>```python
-import oneflow as flow
-import oneflow.nn as nn</p>
-<p>DEVICE = "cuda" if flow.cuda.is_available() else "cpu"
-print("Using {} device".format(DEVICE))</p>
-<p>model_part1 = nn.Sequential(
-    nn.Linear(256, 128), 
-    nn.ReLU(),
-    nn.Linear(128, 64),
-    nn.ReLU()
-)
-model_part1 = model_part1.to(DEVICE)
-model_part1.train()</p>
-<p>model_part2 = nn.Sequential(
-    nn.Linear(64, 32), 
-    nn.ReLU(),
-    nn.Linear(32, 10)
-)
-model_part2 = model_part2.to(DEVICE)
-model_part2.train()</p>
-<p>loss_fn = nn.CrossEntropyLoss().to(DEVICE)
-optimizer = flow.optim.SGD([{'params': model_part1.parameters()},
-                            {'params': model_part2.parameters()}],
-                           lr=1e-3)
-```</p>
-<p>To turn on activation checkpointing, you only need to use method <code>.to(nn.graph.GraphModule)</code> on the Eager model member (i.e. the nn.Module object) to get <code>nn.graph.GraphModule</code> object. And then modify corresponding attribute as <code>.activation_checkpointing = True</code> on the <code>nn.graph.GraphModule</code>. For more details of this API, please refer to: <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.graph.block_config.BlockConfig.activation_checkpointing.html">activation_checkpointing</a>. For each nn.Module with "activation checkpointing" turned on, its input activations will be preserved, while other intermediate activations will be recomputed when used during backpropagation.</p>
-<p>```python
-class CustomGraph(flow.nn.Graph):
-    def <strong>init</strong>(self):
-        super().<strong>init</strong>()
-        self.model_part1 = model_part1
-        self.model_part2 = model_part2
-        # Turn on activation checkpointing on two consecutive nn.Module
-        self.model_part1.to(nn.graph.GraphModule).activation_checkpointing = True
-        self.model_part2.to(nn.graph.GraphModule).activation_checkpointing = True
-        self.loss_fn = loss_fn
-        self.add_optimizer(optimizer)</p>
-<div class="codehilite"><pre><span></span><code>def build(self, x, y):
-    y_pred = self.model_part2(self.model_part1(x))
-    loss = self.loss_fn(y_pred, y)
-    loss.backward()
-    return y_pred, loss
-</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
 
-<p>```</p>
+<span class="n">DEVICE</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">flow</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using </span><span class="si">{}</span><span class="s2"> device&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">))</span>
+
+<span class="n">model_part1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">),</span> 
+    <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">model_part1</span> <span class="o">=</span> <span class="n">model_part1</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+<span class="n">model_part1</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="n">model_part2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">32</span><span class="p">),</span> 
+    <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">model_part2</span> <span class="o">=</span> <span class="n">model_part2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+<span class="n">model_part2</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">([{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">model_part1</span><span class="o">.</span><span class="n">parameters</span><span class="p">()},</span>
+                            <span class="p">{</span><span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">model_part2</span><span class="o">.</span><span class="n">parameters</span><span class="p">()}],</span>
+                           <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+</code></pre></div>
+<p>To turn on activation checkpointing, you only need to use method <code>.to(nn.graph.GraphModule)</code> on the Eager model member (i.e. the nn.Module object) to get <code>nn.graph.GraphModule</code> object. And then modify corresponding attribute as <code>.activation_checkpointing = True</code> on the <code>nn.graph.GraphModule</code>. For more details of this API, please refer to: <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.nn.graph.block_config.BlockConfig.activation_checkpointing.html">activation_checkpointing</a>. For each nn.Module with "activation checkpointing" turned on, its input activations will be preserved, while other intermediate activations will be recomputed when used during backpropagation.</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">CustomGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_part1</span> <span class="o">=</span> <span class="n">model_part1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_part2</span> <span class="o">=</span> <span class="n">model_part2</span>
+        <span class="c1"># Turn on activation checkpointing on two consecutive nn.Module</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_part1</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">activation_checkpointing</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_part2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">activation_checkpointing</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">loss_fn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_part2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_part1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">loss</span>
+</code></pre></div>
 <p>Then, you can start training and other operations as usual.</p>
-<p>```python
-graph_model = CustomGraph()</p>
-<p>for _ in range(100):
-    x = flow.randn(128, 256).to(DEVICE)
-    y = flow.ones(128, 1, dtype=flow.int64).to(DEVICE)
-    graph_model(x, y)
-    # Other codes...
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">graph_model</span> <span class="o">=</span> <span class="n">CustomGraph</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">DEVICE</span><span class="p">)</span>
+    <span class="n">graph_model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="c1"># Other codes...</span>
+</code></pre></div>
 <h2 id="comparative-experiment-on-bert-model">Comparative Experiment on BERT Model<a class="headerlink" href="#comparative-experiment-on-bert-model" title="Permanent link">&para;</a></h2>
 <p>In order to verify the actual effect of Activation Checkpointing, we can conduct comparative experiments on the model <a href="https://arxiv.org/abs/1810.04805">BERT</a>. We can directly use the BERT model provided by <a href="https://github.com/Oneflow-Inc/libai">libai</a>. To turn on Activation Checkpointing, we just need to set <code>train.activation_checkpoint.enabled</code> to <code>True</code> in the configuration file.</p>
 <p>First, get data ready according to <a href="https://libai.readthedocs.io/en/latest/tutorials/get_started/quick_run.html#prepare-the-data-and-the-vocab">Prepare the Data and the Vocab</a>. For simplicity, we use a single device for training (the GPU used in the experimental environment is NVIDIA GeForce RTX 3090, and the memory size is 24268 MB):</p>
-<p><code>bash
-time python tools/train_net.py --config-file configs/bert_large_pretrain.py</code></p>
+<div class="highlight"><pre><span></span><code><span class="nb">time</span> python tools/train_net.py --config-file configs/bert_large_pretrain.py
+</code></pre></div>
 <p>Add the <code>time</code> command at the beginning of the whole command to measure the time spent in the training process.</p>
 <p>The experimental results are as follows:</p>
 <table>

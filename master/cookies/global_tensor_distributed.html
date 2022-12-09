@@ -683,8 +683,22 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    混合并行
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    结语
+  </a>
   
 </li>
       
@@ -918,8 +932,22 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    混合并行
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    结语
+  </a>
   
 </li>
       
@@ -957,13 +985,13 @@
 <p>本文以矩阵乘法为例，解释并行策略间的区别，以及如何利用 <code>Global Tensor</code> 实现不同的并行方式。</p>
 <p>假设神经网络中的某一层是进行矩阵乘法计算，其中，输入 <span class="arithmatex">\(x\)</span> 的形状为 <span class="arithmatex">\(4\times5\)</span>，模型参数 <span class="arithmatex">\(w\)</span> 的形状为 <span class="arithmatex">\(5\times8\)</span>，那么，矩阵乘法输出形状为 <span class="arithmatex">\(4\times8\)</span>。</p>
 <p>基础代码：</p>
-<p>```python
-import oneflow as flow</p>
-<p>x = flow.randn(4, 5)
-w = flow.randn(5, 8)
-out = flow.matmul(x, w)
-print(out.shape) # (4, 8)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 8)</span>
+</code></pre></div>
 <p>示意图如下：</p>
 <p><img alt="matmul" src="../parallelism/imgs/matmul_logical.png" /></p>
 <p>单设备的训练中，以上矩阵乘法计算得到 <span class="arithmatex">\(out\)</span> 后会传递到下一层，并最终计算得到 <span class="arithmatex">\(loss\)</span>。然后，在反向传播过程中，得到 <span class="arithmatex">\(\frac{\partial loss}{\partial w}\)</span>，用于更新 <span class="arithmatex">\(w\)</span>。</p>
@@ -972,16 +1000,16 @@ print(out.shape) # (4, 8)
 <p>OneFlow 特有的 Global Tensor 采用 <code>placement</code> 与 <code>sbp</code> 结合的方式完成分布。其中 <code>placement</code> 表示 Global Tensor 分布的物理设备，<code>sbp</code> 表示 Global Tensor 分布的方式（详情可见：<a href="./global_tensor.md/#global-tensor_2">创建 Global Tensor</a>）。</p>
 <p>以两卡并行为例，矩阵乘法案例的数据并行程序如下：</p>
 <p><strong>注意：没有多个 GPU 的读者，可以通过将本文并行示例中的 <code>placement</code> 指定为 <code>type="cpu"</code>， 实现用 CPU 模拟多设备并行</strong></p>
-<p><code>python
-import oneflow as flow
-placement = flow.placement(type="cuda", ranks=[0, 1])
-x = flow.randn(4, 5, placement=placement, sbp=flow.sbp.split(dim=0))
-w = flow.randn(5, 8, placement=placement, sbp=flow.sbp.broadcast)
-out = flow.matmul(x, w)
-print(out.shape) # (4, 8)</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 8)</span>
+</code></pre></div>
 <p>假设以上程序所在脚本文件为 <code>test.py</code>，不同于上一篇文章，本文章借助 oneflow 分布式工具，在 Terminal 运行以下命令启动程序：</p>
-<p><code>shell
-python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
+<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">2</span> test.py
+</code></pre></div>
 <p>数据并行示意图：</p>
 <p><img alt="Data Paralelism" src="../parallelism/imgs/matmul_data_paralelism.png" /></p>
 <p>以上程序可以看出，Global Tensor 的设计方式使得上述矩阵乘法案例的修改非常简单，只需要将：</p>
@@ -993,17 +1021,17 @@ python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
 <p>当神经网络非常巨大时，数据并行同步梯度的代价很大，此时可以考虑采用模型并行策略。</p>
 <p>与数据并行相反，模型并行是将模型进行切分输入不同设备，而每个设备上的数据保持完整和一致。</p>
 <p>同样以两卡为例，矩阵乘法的模型并行程序如下：</p>
-<p>```python
-import oneflow as flow</p>
-<p>placement = flow.placement(type="cuda", ranks=[0, 1])
-x = flow.randn(4, 5, placement=placement, sbp=flow.sbp.broadcast)
-w = flow.randn(5, 8, placement=placement, sbp=flow.sbp.split(dim=1))
-out = flow.matmul(x, w)
-print(out.shape) # (4, 8)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 8)</span>
+</code></pre></div>
 <p>假设以上程序所在脚本文件为 <code>test.py</code>，在 Terminal 运行以下命令启动程序：
-<code>shell
-python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
+<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">2</span> test.py
+</code></pre></div></p>
 <p>模型并行示意图：</p>
 <p><img alt="Data Parallelism" src="../parallelism/imgs/matmul_model_paralelism.png" /></p>
 <p>同样只需要修改以下两部分：</p>
@@ -1014,27 +1042,30 @@ python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
 <h3 id="_4">流水并行<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
 <p>当神经网络过于巨大，无法在一个设备上存放时，可以选择流水并行策略。 流水并行将网络切分为多个阶段，并分发到不同的计算设备上，各个计算设备之间以“流水线”的方式完成训练。</p>
 <p>以两卡流水并行为例，构造两阶段示例程序：</p>
-<p>```python
-import oneflow as flow</p>
-<p>P0 = flow.placement(type="cuda", ranks=[0])
-P1 = flow.placement(type="cuda", ranks=[1])
-BROADCAST = flow.sbp.broadcast</p>
-<h1 id="0">模型第一阶段分布在第 0 卡<a class="headerlink" href="#0" title="Permanent link">&para;</a></h1>
-<p>w0 = flow.randn(5, 8, placement=P0, sbp=BROADCAST)</p>
-<h1 id="1">模型第二阶段分布在第 1 卡<a class="headerlink" href="#1" title="Permanent link">&para;</a></h1>
-<p>w1 = flow.randn(8, 3, placement=P1, sbp=BROADCAST)</p>
-<h1 id="0_1">随机生成数据模拟输入，注意第一阶段的数据分布在第 0 卡<a class="headerlink" href="#0_1" title="Permanent link">&para;</a></h1>
-<p>in_stage0 = flow.randn(4, 5, placement=P0, sbp=BROADCAST)
-out_stage0 = flow.matmul(in_stage0, w0)
-print(out_stage0.shape) # (4, 8)</p>
-<h1 id="to_global-1">利用 to_global 将第二阶段的数据分布在第 1 卡<a class="headerlink" href="#to_global-1" title="Permanent link">&para;</a></h1>
-<p>in_stage1 = out_stage0.to_global(placement=P1, sbp=BROADCAST)
-out_stage1 = flow.matmul(in_stage1, w1)
-print(out_stage1.shape) # (4, 3)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">P0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">P1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">BROADCAST</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
+
+<span class="c1"># 模型第一阶段分布在第 0 卡</span>
+<span class="n">w0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">BROADCAST</span><span class="p">)</span>
+<span class="c1"># 模型第二阶段分布在第 1 卡</span>
+<span class="n">w1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P1</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">BROADCAST</span><span class="p">)</span>
+
+<span class="c1"># 随机生成数据模拟输入，注意第一阶段的数据分布在第 0 卡</span>
+<span class="n">in_stage0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P0</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">BROADCAST</span><span class="p">)</span>
+<span class="n">out_stage0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">in_stage0</span><span class="p">,</span> <span class="n">w0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">out_stage0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 8)</span>
+
+<span class="c1"># 利用 to_global 将第二阶段的数据分布在第 1 卡</span>
+<span class="n">in_stage1</span> <span class="o">=</span> <span class="n">out_stage0</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P1</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">BROADCAST</span><span class="p">)</span>
+<span class="n">out_stage1</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">in_stage1</span><span class="p">,</span> <span class="n">w1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">out_stage1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 3)</span>
+</code></pre></div>
 <p>假设以上程序所在脚本文件为 <code>test.py</code>，在 Terminal 运行以下命令启动程序：
-<code>shell
-python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
+<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">2</span> test.py
+</code></pre></div></p>
 <p>以上程序采用矩阵乘法，模拟了一个两阶段神经网络。与数据并行和模型并行不同，流水并行中的数据和模型均未被切分，而是分别将两个阶段分布在不同的设备上进行计算。</p>
 <p>Global Tensor 的设计，使得计算过程中，只需通过 <code>to_global(...)</code> 方法调整上一阶段的输出数据的分布策略，作为下一阶段的输入数据即可。</p>
 <h3 id="_5">混合并行<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
@@ -1051,105 +1082,114 @@ python3 -m oneflow.distributed.launch --nproc_per_node 2 test.py</code></p>
 <p>分别 <strong>点击</strong> 以下 <code>Eager</code> 或 <code>Graph</code> 标签，查看 两种模式的示例代码</p>
 </div>
 <div class="tabbed-set" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><label for="__tabbed_1_1">Eager</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow
-import oneflow.nn as nn</p>
-<p>P01 = flow.placement(type="cuda", ranks=[0, 1])
-P23 = flow.placement(type="cuda", ranks=[2, 3])</p>
-<p>class StageModule(nn.Module):
-    def <strong>init</strong>(self, in_dims, out_dims, placement=None, sbp=None):
-        super().<strong>init</strong>()
-        self.w = nn.Parameter(
-            flow.randn(in_dims, out_dims, placement=placement, sbp=sbp)
-        )</p>
-<div class="codehilite"><pre><span></span><code>def forward(self, x):
-    out = flow.matmul(x, self.w)
-    return out
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="n">P01</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">P23</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+
+<span class="k">class</span> <span class="nc">StageModule</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dims</span><span class="p">,</span> <span class="n">out_dims</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+            <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">in_dims</span><span class="p">,</span> <span class="n">out_dims</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">class</span> <span class="nc">ModuleModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># 模型第一阶段在第 0 和第 1 卡上进行数据并行计算</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span> <span class="o">=</span> <span class="n">StageModule</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+
+        <span class="c1"># 模型第二阶段在第 2 和第 3 卡上进行模型并行计算</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span> <span class="o">=</span> <span class="n">StageModule</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># 第一阶段，数据切分在第 0 和第 1 卡，用于数据并行</span>
+        <span class="n">out_stage0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># 第二阶段需要将输入数据还原完整，并转移至第 2 和第 3 卡，用于模型并行</span>
+        <span class="n">in_stage1</span> <span class="o">=</span> <span class="n">out_stage0</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+        <span class="n">out_stage1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span><span class="p">(</span><span class="n">in_stage1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out_stage0</span><span class="p">,</span> <span class="n">out_stage1</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ModuleModel</span><span class="p">()</span>
+    <span class="c1"># 需要将输入数据切分，用于数据并行</span>
+    <span class="n">in_stage0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">out_stage0</span><span class="p">,</span> <span class="n">out_stage1</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">in_stage0</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">out_stage0</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">out_stage1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (4, 8) (4, 3)</span>
 </code></pre></div>
-
-<p>class ModuleModel(nn.Module):
-    def <strong>init</strong>(self):
-        super().<strong>init</strong>()</p>
-<div class="codehilite"><pre><span></span><code>    # 模型第一阶段在第 0 和第 1 卡上进行数据并行计算
-    self.m_stage0 = StageModule(5, 8, placement=P01, sbp=flow.sbp.broadcast)
-
-    # 模型第二阶段在第 2 和第 3 卡上进行模型并行计算
-    self.m_stage1 = StageModule(8, 3, placement=P23, sbp=flow.sbp.split(dim=1))
-
-def forward(self, x):
-    # 第一阶段，数据切分在第 0 和第 1 卡，用于数据并行
-    out_stage0 = self.m_stage0(x)
-
-    # 第二阶段需要将输入数据还原完整，并转移至第 2 和第 3 卡，用于模型并行
-    in_stage1 = out_stage0.to_global(placement=P23, sbp=flow.sbp.broadcast)
-    out_stage1 = self.m_stage1(in_stage1)
-
-    return out_stage0, out_stage1
-</code></pre></div>
-
-<p>if <strong>name</strong> == "<strong>main</strong>":
-    model = ModuleModel()
-    # 需要将输入数据切分，用于数据并行
-    in_stage0 = flow.randn(4, 5, placement=P01, sbp=flow.sbp.split(dim=0))
-    out_stage0, out_stage1 = model(in_stage0)
-    print(out_stage0.shape, out_stage1.shape)  # (4, 8) (4, 3)
-```</p>
 </div>
 <input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><label for="__tabbed_1_2">Graph</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow
-import oneflow.nn as nn</p>
-<p>P01 = flow.placement(type="cuda", ranks=[0, 1])
-P23 = flow.placement(type="cuda", ranks=[2, 3])</p>
-<p>class StageModule(nn.Module):
-    def <strong>init</strong>(self, in_dims, out_dims, placement=None, sbp=None):
-        super().<strong>init</strong>()
-        self.w = nn.Parameter(
-            flow.randn(in_dims, out_dims, placement=placement, sbp=sbp)
-        )</p>
-<div class="codehilite"><pre><span></span><code>def forward(self, x):
-    out = flow.matmul(x, self.w)
-    return out
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="n">P01</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">P23</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+
+<span class="k">class</span> <span class="nc">StageModule</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">in_dims</span><span class="p">,</span> <span class="n">out_dims</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span>
+            <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">in_dims</span><span class="p">,</span> <span class="n">out_dims</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">class</span> <span class="nc">ModuleModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># 模型第一阶段在第 0 和第 1 卡上进行数据并行计算</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span> <span class="o">=</span> <span class="n">StageModule</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+
+        <span class="c1"># 模型第二阶段在第 2 和第 3 卡上进行模型并行计算</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span> <span class="o">=</span> <span class="n">StageModule</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># 第一阶段，数据切分在第 0 和第 1 卡，用于数据并行</span>
+        <span class="n">out_stage0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage0</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># 第二阶段需要将输入数据还原完整，并转移至第 2 和第 3 卡，用于模型并行</span>
+        <span class="n">in_stage1</span> <span class="o">=</span> <span class="n">out_stage0</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+        <span class="n">out_stage1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_stage1</span><span class="p">(</span><span class="n">in_stage1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out_stage0</span><span class="p">,</span> <span class="n">out_stage1</span>
+
+
+<span class="c1"># Graph</span>
+<span class="k">class</span> <span class="nc">GraphModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">ModuleModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">m_stage0</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">set_stage</span><span class="p">(</span><span class="n">stage_id</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">m_stage1</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">GraphModule</span><span class="p">)</span><span class="o">.</span><span class="n">set_stage</span><span class="p">(</span><span class="n">stage_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P23</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">GraphModel</span><span class="p">()</span>
+    <span class="c1"># 需要将输入数据切分，用于数据并行</span>
+    <span class="n">in_stage0</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">P01</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">out_stage0</span><span class="p">,</span> <span class="n">out_stage1</span> <span class="o">=</span> <span class="n">graph</span><span class="p">(</span><span class="n">in_stage0</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">out_stage0</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">out_stage1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (4, 8) (4, 3)</span>
 </code></pre></div>
-
-<p>class ModuleModel(nn.Module):
-    def <strong>init</strong>(self):
-        super().<strong>init</strong>()</p>
-<div class="codehilite"><pre><span></span><code>    # 模型第一阶段在第 0 和第 1 卡上进行数据并行计算
-    self.m_stage0 = StageModule(5, 8, placement=P01, sbp=flow.sbp.broadcast)
-
-    # 模型第二阶段在第 2 和第 3 卡上进行模型并行计算
-    self.m_stage1 = StageModule(8, 3, placement=P23, sbp=flow.sbp.split(dim=1))
-
-def forward(self, x):
-    # 第一阶段，数据切分在第 0 和第 1 卡，用于数据并行
-    out_stage0 = self.m_stage0(x)
-
-    # 第二阶段需要将输入数据还原完整，并转移至第 2 和第 3 卡，用于模型并行
-    in_stage1 = out_stage0.to_global(placement=P23, sbp=flow.sbp.broadcast)
-    out_stage1 = self.m_stage1(in_stage1)
-
-    return out_stage0, out_stage1
-</code></pre></div>
-
-<h1 id="graph">Graph<a class="headerlink" href="#graph" title="Permanent link">&para;</a></h1>
-<p>class GraphModel(nn.Graph):
-    def <strong>init</strong>(self):
-        super().<strong>init</strong>()
-        self.model = ModuleModel()
-        self.model.m_stage0.to(nn.graph.GraphModule).set_stage(stage_id=0, placement=P01)
-        self.model.m_stage1.to(nn.graph.GraphModule).set_stage(stage_id=1, placement=P23)</p>
-<div class="codehilite"><pre><span></span><code>def build(self, x):
-    return self.model(x)
-</code></pre></div>
-
-<p>if <strong>name</strong> == "<strong>main</strong>":
-    graph = GraphModel()
-    # 需要将输入数据切分，用于数据并行
-    in_stage0 = flow.randn(4, 5, placement=P01, sbp=flow.sbp.split(dim=0))
-    out_stage0, out_stage1 = graph(in_stage0)
-    print(out_stage0.shape, out_stage1.shape)  # (4, 8) (4, 3)
-```</p>
 </div>
 </div>
 <p>以上程序构建了一个两阶段网络，其 <code>2 机 2 卡</code> 并行方式如下图所示：</p>
@@ -1160,29 +1200,29 @@ def forward(self, x):
 <ol>
 <li>
 <p>单机四卡启动方式为：</p>
-<p><code>shell
-python3 -m oneflow.distributed.launch --nproc_per_node 4 test.py</code></p>
+<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch --nproc_per_node <span class="m">4</span> test.py
+</code></pre></div>
 </li>
 <li>
 <p>oneflow 分布式工具支持多机多设备并行，以 <code>2 机 2 卡</code> 环境为例，启动方式如下：</p>
 <p>在 第 0 号机器上运行：
-<code>shell
-python3 -m oneflow.distributed.launch \
-    --nnodes=2 \
-    --node_rank=0 \
-    --nproc_per_node=2 \
-    --master_addr="192.168.1.1" \ # 第 0 号机器的 IP
-    --master_port=7788 \
-    test.py</code></p>
+<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch <span class="se">\</span>
+    --nnodes<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
+    --node_rank<span class="o">=</span><span class="m">0</span> <span class="se">\</span>
+    --nproc_per_node<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
+    --master_addr<span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span> <span class="se">\ </span><span class="c1"># 第 0 号机器的 IP</span>
+    --master_port<span class="o">=</span><span class="m">7788</span> <span class="se">\</span>
+    test.py
+</code></pre></div></p>
 <p>在 第 1 号机器上运行：
-<code>shell
-python3 -m oneflow.distributed.launch \
-    --nnodes=2 \
-    --node_rank=1 \
-    --nproc_per_node=2 \
-    --master_addr="192.168.1.1" \ # 第 0 号机器的 IP
-    --master_port=7788 \
-    test.py</code></p>
+<div class="highlight"><pre><span></span><code>python3 -m oneflow.distributed.launch <span class="se">\</span>
+    --nnodes<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
+    --node_rank<span class="o">=</span><span class="m">1</span> <span class="se">\</span>
+    --nproc_per_node<span class="o">=</span><span class="m">2</span> <span class="se">\</span>
+    --master_addr<span class="o">=</span><span class="s2">&quot;192.168.1.1&quot;</span> <span class="se">\ </span><span class="c1"># 第 0 号机器的 IP</span>
+    --master_port<span class="o">=</span><span class="m">7788</span> <span class="se">\</span>
+    test.py
+</code></pre></div></p>
 <p>注意要将 <code>master_addr</code> 设置为第 0 号机器的 IP</p>
 </li>
 </ol>

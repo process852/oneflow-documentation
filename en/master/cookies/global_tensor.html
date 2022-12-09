@@ -656,6 +656,61 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#converting-local-tensor-to-global-tensor" class="md-nav__link">
+    Converting Local Tensor to Global Tensor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#converting-global-tensor-to-local-tensor" class="md-nav__link">
+    Converting Global Tensor to Local Tensor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#converting-one-global-tensor-to-another-global-tensor" class="md-nav__link">
+    Converting One Global Tensor to Another Global Tensor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-tensor-participating-in-computation" class="md-nav__link">
+    Global Tensor Participating in Computation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    Conclusion
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    Further Reading
+  </a>
+  
+    <nav class="md-nav" aria-label="Further Reading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#oneflows-multi-machine-multi-gpu-launching-and-its-required-environment-variables" class="md-nav__link">
+    OneFlow's multi-machine multi-GPU launching and its required environment variables
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -871,6 +926,61 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#converting-local-tensor-to-global-tensor" class="md-nav__link">
+    Converting Local Tensor to Global Tensor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#converting-global-tensor-to-local-tensor" class="md-nav__link">
+    Converting Global Tensor to Local Tensor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#converting-one-global-tensor-to-another-global-tensor" class="md-nav__link">
+    Converting One Global Tensor to Another Global Tensor
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-tensor-participating-in-computation" class="md-nav__link">
+    Global Tensor Participating in Computation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    Conclusion
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#further-reading" class="md-nav__link">
+    Further Reading
+  </a>
+  
+    <nav class="md-nav" aria-label="Further Reading">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#oneflows-multi-machine-multi-gpu-launching-and-its-required-environment-variables" class="md-nav__link">
+    OneFlow's multi-machine multi-GPU launching and its required environment variables
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -906,19 +1016,18 @@
 <p>Global Tensor allows users to easily develop models on multi-device multi-GPU. Compared to utilizing the original communication operators, the efficiency of developing parallelly executed models will be doubled.</p>
 <h2 id="creating-global-tensor">Creating Global Tensor<a class="headerlink" href="#creating-global-tensor" title="Permanent link">&para;</a></h2>
 <p>Let’s try to create a Global Tensor on a machine with two GPUs. Take <code>randn</code> operator for example, a Python file named <code>test_randn_global.py</code> needs to be created and add the following content to it:</p>
-<p>```python
-import oneflow as flow</p>
-<h1 id="place-a-global-tensor-on-cuda-device-of-rankprocess-0-and-1">Place a global tensor on cuda device of rank(process) 0 and 1<a class="headerlink" href="#place-a-global-tensor-on-cuda-device-of-rankprocess-0-and-1" title="Permanent link">&para;</a></h1>
-<p>placement = flow.placement(type="cuda", ranks=[0, 1])</p>
-<h1 id="each-ranks-local-data-is-a-part-data-as-a-result-of-spliting-global-data-on-dim-0">Each rank's local data is a part data as a result of spliting global data on dim 0<a class="headerlink" href="#each-ranks-local-data-is-a-part-data-as-a-result-of-spliting-global-data-on-dim-0" title="Permanent link">&para;</a></h1>
-<p>sbp = flow.sbp.split(dim=0)</p>
-<h1 id="create-a-global-tensor-by-randn">Create a global tensor by randn<a class="headerlink" href="#create-a-global-tensor-by-randn" title="Permanent link">&para;</a></h1>
-<p>x = flow.randn(4, 5, placement=placement, sbp=sbp)</p>
-<h1 id="print-local-data">Print local data<a class="headerlink" href="#print-local-data" title="Permanent link">&para;</a></h1>
-<p>print("Local data of global tensor:\n ", x.to_local().numpy())</p>
-<h1 id="print-global-data">Print global data<a class="headerlink" href="#print-global-data" title="Permanent link">&para;</a></h1>
-<p>print("Global data of global tensor:\n ", x.numpy())
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="c1"># Place a global tensor on cuda device of rank(process) 0 and 1</span>
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="c1"># Each rank&#39;s local data is a part data as a result of spliting global data on dim 0</span>
+<span class="n">sbp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1"># Create a global tensor by randn</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+<span class="c1"># Print local data</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Local data of global tensor:</span><span class="se">\n</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">to_local</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+<span class="c1"># Print global data</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Global data of global tensor:</span><span class="se">\n</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+</code></pre></div>
 <p>Here are some explanations for some new concepts in the code above:</p>
 <ul>
 <li><code>placement</code> refers to the physical device where the Global Tensor locates. The parameter <code>type</code> specifies the type of the physical device, and here we use <code>"cuda"</code> to represent the GPU device. The parameter <code>ranks</code> specifies the device ID. For readers who don’t have 2 GPUs, the parameter <code>type</code> can be specified as <code>"cpu"</code> to use the CPU to simulate multiple devices, and the following code still works.</li>
@@ -931,50 +1040,53 @@ import oneflow as flow</p>
 <p><strong>Clicking</strong> the label "Terminal 0" or "Terminal 1" separately to check its corresponding console’s command/code.</p>
 </div>
 <div class="tabbed-set" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><label for="__tabbed_1_1">Terminal 0</label><div class="tabbed-content">
-<p><code>shell
-export MASTER_ADDR=127.0.0.1 MASTER_PORT=17789 WORLD_SIZE=2 RANK=0 LOCAL_RANK=0</code></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">MASTER_ADDR</span><span class="o">=</span><span class="m">127</span>.0.0.1 <span class="nv">MASTER_PORT</span><span class="o">=</span><span class="m">17789</span> <span class="nv">WORLD_SIZE</span><span class="o">=</span><span class="m">2</span> <span class="nv">RANK</span><span class="o">=</span><span class="m">0</span> <span class="nv">LOCAL_RANK</span><span class="o">=</span><span class="m">0</span>
+</code></pre></div>
 </div>
 <input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><label for="__tabbed_1_2">Terminal 1</label><div class="tabbed-content">
-<p><code>shell
-export MASTER_ADDR=127.0.0.1 MASTER_PORT=17789 WORLD_SIZE=2 RANK=1 LOCAL_RANK=1</code></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">MASTER_ADDR</span><span class="o">=</span><span class="m">127</span>.0.0.1 <span class="nv">MASTER_PORT</span><span class="o">=</span><span class="m">17789</span> <span class="nv">WORLD_SIZE</span><span class="o">=</span><span class="m">2</span> <span class="nv">RANK</span><span class="o">=</span><span class="m">1</span> <span class="nv">LOCAL_RANK</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div>
 </div>
 </div>
 <p>More about detailed explanation of the environment variables above and how to conduct a distributed launching with the help of tools, please refer to <a href="#_2">Further reading</a>.</p>
 <p>Finally, launch <code>test_randn_global.py</code> in two terminals respectively and observe the results of creating the Global Tensor:</p>
-<p><code>python3 test_randn_global.py</code></p>
+<div class="highlight"><pre><span></span><code>python3 test_randn_global.py
+</code></pre></div>
 <p>In Terminal 0 (rank 0), we can see:</p>
-<p><code>Local data of global tensor:
+<div class="highlight"><pre><span></span><code>Local data of global tensor:
   [[-0.07157125 -0.92717147  1.5102768   1.4611115   1.014263  ]
  [-0.1511031   1.570759    0.9416077   0.6184639   2.4420679 ]]
 Global data of global tensor:
   [[-0.07157125 -0.92717147  1.5102768   1.4611115   1.014263  ]
  [-0.1511031   1.570759    0.9416077   0.6184639   2.4420679 ]
  [-0.38203463  0.453836    0.9136015   2.35773    -0.3279942 ]
- [-0.8570119  -0.91476554 -0.06646168  0.50022084 -0.4387695 ]]</code></p>
+ [-0.8570119  -0.91476554 -0.06646168  0.50022084 -0.4387695 ]]
+</code></pre></div>
 <p>In Terminal 1 (rank 1), we can see:</p>
-<p><code>Local data of global tensor:
+<p><div class="highlight"><pre><span></span><code>Local data of global tensor:
   [[-0.38203463  0.453836    0.9136015   2.35773    -0.3279942 ]
  [-0.8570119  -0.91476554 -0.06646168  0.50022084 -0.4387695 ]]
 Global data of global tensor:
   [[-0.07157125 -0.92717147  1.5102768   1.4611115   1.014263  ]
  [-0.1511031   1.570759    0.9416077   0.6184639   2.4420679 ]
  [-0.38203463  0.453836    0.9136015   2.35773    -0.3279942 ]
- [-0.8570119  -0.91476554 -0.06646168  0.50022084 -0.4387695 ]]</code>
+ [-0.8570119  -0.91476554 -0.06646168  0.50022084 -0.4387695 ]]
+</code></pre></div>
 It’s clear that if we concatenate the Local Tensors in rank 1 and rank 2 on dimension 0, we can get the complete value of the Global Tensor.</p>
 <h2 id="converting-local-tensor-to-global-tensor">Converting Local Tensor to Global Tensor<a class="headerlink" href="#converting-local-tensor-to-global-tensor" title="Permanent link">&para;</a></h2>
 <p>We can firstly create a Local Tensor and then utilize the <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.Tensor.to_global.html">Tensor.to_global</a> method to convert the Local Tensor to a Global Tensor.</p>
 <p>Create the following program and launch it in the similar way mentioned above:</p>
-<p><code>python
-import oneflow as flow
-x = flow.randn(2, 5).cuda()
-print(x.is_local) # True
-print(x.is_global) # False
-placement = flow.placement(type="cuda", ranks=[0, 1])
-sbp = flow.sbp.split(0)
-x_global = x.to_global(placement=placement, sbp=sbp)
-print(x_global.shape) # (4, 5)
-print(x.is_local) # True
-print(x_global.is_global) # True</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_local</span><span class="p">)</span> <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_global</span><span class="p">)</span> <span class="c1"># False</span>
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">sbp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x_global</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x_global</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 5)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">is_local</span><span class="p">)</span> <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x_global</span><span class="o">.</span><span class="n">is_global</span><span class="p">)</span> <span class="c1"># True</span>
+</code></pre></div>
 <p>This program separately creates a Local Tensor with the shape of (2,5) on 2 GPUs, and the newly-created tensors are called x.</p>
 <p>Then, we specify cuda devices in rank 0 and rank 1 as the placement and <code>split(dim=0)</code> as its SBP. After the <code>to_global</code> method, the original Local Tensor is converted to the Global Tensor named <code>x_global</code>.</p>
 <p>We can see that the shape of <code>x_global</code> has been changed into <code>(4, 5)</code>, which is the same as the (global) shape of the Global Tensor.</p>
@@ -983,21 +1095,23 @@ print(x_global.is_global) # True</code></p>
 <p>Except for shape, the Global Tensor also contains some data. The Global Tensor has a Local Tensor in each rank to symbolize its local component, which is its physical data in every rank. By the way, each rank only stores different parts of the data.</p>
 <h2 id="converting-global-tensor-to-local-tensor">Converting Global Tensor to Local Tensor<a class="headerlink" href="#converting-global-tensor-to-local-tensor" title="Permanent link">&para;</a></h2>
 <p>You can utilize the <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.Tensor.to_local.html">to_local</a> method to obtain the local component of the Global Tensor, just like the following:</p>
-<p><code>python
-import oneflow as flow
-placement = flow.placement(type="cuda", ranks=[0, 1])
-sbp = flow.sbp.split(0)
-x = flow.randn(4, 5, placement=placement, sbp=sbp)
-print(x.to_local())</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">sbp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">to_local</span><span class="p">())</span>
+</code></pre></div>
 <p>When the <code>x.to_local()</code> method is executed, two different ranks will separately obtain a Local Tensor with the shape of <code>(2, 5)</code>.</p>
 <p>In Terminal 0 (rank 0), we can see:</p>
-<p><code>tensor([[-0.2730,  1.8042,  0.0721, -0.5024, -1.2583],
+<div class="highlight"><pre><span></span><code>tensor([[-0.2730,  1.8042,  0.0721, -0.5024, -1.2583],
         [-0.3379,  0.9371,  0.7981, -0.5447, -0.5629]],
-       dtype=oneflow.float32)</code></p>
+       dtype=oneflow.float32)
+</code></pre></div>
 <p>In Terminal 1 (rank 1), we can see:</p>
-<p><code>tensor([[ 0.6829,  0.4849,  2.1611,  1.4059,  0.0934], 
+<div class="highlight"><pre><span></span><code>tensor([[ 0.6829,  0.4849,  2.1611,  1.4059,  0.0934], 
         [-0.0301, -0.6942, -0.8094, -1.3050, -0.1778]], 
-       dtype=oneflow.float32)</code></p>
+       dtype=oneflow.float32)
+</code></pre></div>
 <p>The <code>to_local()</code> has no parameters, because the Global Tensor has already confirmed its local component according to the placement and SBP, and it’s fine to directly acquire the Local Tensor that its local component corresponds to.</p>
 <h2 id="converting-one-global-tensor-to-another-global-tensor">Converting One Global Tensor to Another Global Tensor<a class="headerlink" href="#converting-one-global-tensor-to-another-global-tensor" title="Permanent link">&para;</a></h2>
 <p>Usually, distributed computing requires inserting communication operations into normal computational logic, but OneFlow only needs users to convert the data distribution type of the Global Tensor.</p>
@@ -1026,34 +1140,34 @@ print(x.to_local())</code></p>
 <p>Similarly, it’s only required to specify the new global data distribution type that the Global Tensor will be converted into, and OneFlow will complete implicit communication operations automatically. And the interface to convert the global data distribution type is <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.Tensor.to_global.html">Tensor.to_global</a>. The <code>to_global</code> method contains two parameters- <code>placement</code> and <code>sbp</code>, which decide the newly-converted global data distribution type.</p>
 <p>The main implicit operations in converting the global data distribution type are to infer and execute the communications, and these operations are implemented by OneFlow’s <a href="../parallelism/03_consistent_tensor#boxing-sbp">Boxing</a>, which is a mechanism to re-distribute data automatically.</p>
 <p>The following is a case to convert a split-distributed Global Tensor to a broadcast-distributed one:</p>
-<p><code>python
-import oneflow as flow
-x = flow.randn(2, 5).cuda()
-placement = flow.placement(type="cuda", ranks=[0, 1])
-sbp = flow.sbp.split(0)
-x_global = x.to_global(placement=placement, sbp=sbp)
-print(x_global.shape) # (4, 5)
-print(x_global.to_local())
-sbp_b = flow.sbp.broadcast
-x_global_b = x_global.to_global(placement=placement, sbp=sbp_b)
-print(x_global_b.shape) # (4, 5)
-print(x_global_b.to_local())</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">sbp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x_global</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x_global</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 5)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x_global</span><span class="o">.</span><span class="n">to_local</span><span class="p">())</span>
+<span class="n">sbp_b</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span>
+<span class="n">x_global_b</span> <span class="o">=</span> <span class="n">x_global</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp_b</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x_global_b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (4, 5)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x_global_b</span><span class="o">.</span><span class="n">to_local</span><span class="p">())</span>
+</code></pre></div>
 <p>When the global data distribution type is converted from <code>x_global</code> to <code>x_global_b</code>, the parameter <code>sbp</code> has changed from <code>flow.sbp.split(0)</code> to <code>flow.sbp.broadcast</code>. Their global shapes have remained <code>(4, 5)</code>, but the local component has turned from a data slice into complete data, and this change can be seen from the printed result of the <code>to_local()</code>.</p>
 <p>Here, the <code>to_global</code> conversion has merged the Local Tensors. Generally speaking, SPMD programming mode requires users to write an <code>all-gather</code> collective communication to merge the Local Tensors, but in OneFlow Global View programming, the type conversion is enough to complete the merging process.  </p>
 <p>Global Tensor’s type conversion can infer and execute the communication operations automatically. So, algorithm developers can concentrate on <strong>thinking in data distribution</strong> rather than <strong>thinking in data communication operation</strong>, and what they imagine is what they obtain, which helps them to develop distributed programs more efficiently.</p>
 <p>Let’s add by introducing how to apply <code>numpy()</code> to the Global Tensor. For random Global Tensor, such as <code>x_global</code>, <code>x_global.numpy()</code> is equivalent to <code>x_global.to_global(spb=flow.sbp.broadcast).to_local().numpy()</code>, which means <code>x_global.numpy()</code> will firstly convert the original Global Tensor to one, which SBP is <code>flow.sbp.broadcast()</code>, then conduct a <code>to_local</code> operation and finally invoke <code>numpy()</code> for the Local Tensor. Therefore, the <code>x_global.numpy()</code> method can obtain complete data.</p>
 <h2 id="global-tensor-participating-in-computation">Global Tensor Participating in Computation<a class="headerlink" href="#global-tensor-participating-in-computation" title="Permanent link">&para;</a></h2>
 <p>This section introduces how the Global Tensor participates in practical computation. Take the Global Tensor participating in matrix multiplication computation for example, please firstly create the following program:</p>
-<p><code>python
-import oneflow as flow
-placement = flow.placement(type="cuda", ranks=[0, 1])
-x = flow.randn(4, 5, placement=placement, sbp=flow.sbp.split(dim=0))
-w = flow.randn(5, 8, placement=placement, sbp=flow.sbp.broadcast)
-y = flow.matmul(x, w)
-print(y.is_global)  # True
-print(y.shape)  # (4, 8)
-print(y.sbp)  # (flow.sbp.split(dim=0))
-print(y.to_local().numpy())</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="n">ranks</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">is_global</span><span class="p">)</span>  <span class="c1"># True</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (4, 8)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">sbp</span><span class="p">)</span>  <span class="c1"># (flow.sbp.split(dim=0))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">to_local</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+</code></pre></div>
 <p>In the program above, we have created 2 Global Tensors-<code>x</code> and <code>w</code>, and they participate in <code>oneflow.matmul</code> computation and generate <code>y</code>. </p>
 <p>Most of OneFlow’s operators support computing the Global Tensor. When <code>flow.matmul</code> executes the Global Tensor, there is nothing special about its interface. Arguably, most of OneFlow’s operators are polymorphic, so they can decide how to compute according to the input:</p>
 <ul>

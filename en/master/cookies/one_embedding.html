@@ -801,8 +801,29 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-to-choose-the-proper-storage-configuration" class="md-nav__link">
+    How to Choose the Proper Storage Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributed-training" class="md-nav__link">
+    Distributed Training
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extended-reading-dlrm" class="md-nav__link">
+    Extended Reading: DLRM
+  </a>
   
 </li>
       
@@ -974,8 +995,29 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#how-to-choose-the-proper-storage-configuration" class="md-nav__link">
+    How to Choose the Proper Storage Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributed-training" class="md-nav__link">
+    Distributed Training
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extended-reading-dlrm" class="md-nav__link">
+    Extended Reading: DLRM
+  </a>
   
 </li>
       
@@ -998,12 +1040,12 @@
                 
                 <h1 id="large-scale-embedding-solution-oneembedding">Large-Scale Embedding Solution: OneEmbedding<a class="headerlink" href="#large-scale-embedding-solution-oneembedding" title="Permanent link">&para;</a></h1>
 <p>Embedding is an important component of recommender system, and it has also spread to many fields outside recommender systems. Each framework provides basic operators for Embedding, for example, <code>flow.nn.Embedding</code> in OneFlow:</p>
-<p><code>python
-import numpy as np
-import oneflow as flow
-indices = flow.tensor([[1, 2, 4, 5], [4, 3, 2, 9]], dtype=flow.int)
-embedding = flow.nn.Embedding(10, 3)
-y = embedding(indices)</code></p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="n">indices</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">embedding</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+</code></pre></div>
 <p>OneEmbedding is the large-scale Embedding solution that OneFlow provides to solve the problem of large-scale deep recommender systems. OneEmbedding has the following advantages compared to ordionary opeartors:</p>
 <ol>
 <li>
@@ -1023,89 +1065,89 @@ y = embedding(indices)</code></p>
 </ul>
 <h3 id="configure-embedding-table-with-make_table_options">Configure Embedding Table with <code>make_table_options</code><a class="headerlink" href="#configure-embedding-table-with-make_table_options" title="Permanent link">&para;</a></h3>
 <p>By importing relevant package and the following codes, you can configure Embedding table with <code>make_table_options</code>.OneEmbedding supports simultaneous creation of multiple Embedding table. The following codes configured three Embedding table.</p>
-<p>```python
-import oneflow as flow
-import oneflow.nn as nn
-import numpy as np</p>
-<p>tables = [
-    flow.one_embedding.make_table_options(
-        flow.one_embedding.make_uniform_initializer(low=-0.1, high=0.1)
-    ),
-    flow.one_embedding.make_table_options(
-        flow.one_embedding.make_uniform_initializer(low=-0.05, high=0.05)
-    ),
-    flow.one_embedding.make_table_options(
-        flow.one_embedding.make_uniform_initializer(low=-0.15, high=0.15)
-    ),
-]
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="kn">import</span> <span class="nn">oneflow.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">tables</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_table_options</span><span class="p">(</span>
+        <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_uniform_initializer</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_table_options</span><span class="p">(</span>
+        <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_uniform_initializer</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_table_options</span><span class="p">(</span>
+        <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_uniform_initializer</span><span class="p">(</span><span class="n">low</span><span class="o">=-</span><span class="mf">0.15</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+</code></pre></div>
 <p>When configuring the Embedding table, you need to specify the initialization method. The above Embedding tables are initialized in the <code>uniform</code> method. The result of configuring the Embedding table is stored in the <code>tables</code> variable</p>
 <p>Click <a href="https://oneflow.readthedocs.io/en/v0.8.1/one_embedding.html#oneflow.one_embedding.make_table_options">make_table_options</a> and <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.make_uniform_initializer.html#oneflow.one_embedding.make_uniform_initializer">make_uniform_initializer</a> to check more detailed information.</p>
 <h3 id="configure-the-storage-attribute-of-the-embedding-table">Configure the Storage Attribute of the Embedding Table<a class="headerlink" href="#configure-the-storage-attribute-of-the-embedding-table" title="Permanent link">&para;</a></h3>
 <p>Then run the following codes to configure the storage attribute of the Embedding table:</p>
-<p><code>python
-store_options = flow.one_embedding.make_cached_ssd_store_options(
-    cache_budget_mb=8142,
-    persistent_path="/your_path_to_ssd", 
-    capacity=40000000,
-    size_factor=1,              
-    physical_block_size=512
-)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">store_options</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">make_cached_ssd_store_options</span><span class="p">(</span>
+    <span class="n">cache_budget_mb</span><span class="o">=</span><span class="mi">8142</span><span class="p">,</span>
+    <span class="n">persistent_path</span><span class="o">=</span><span class="s2">&quot;/your_path_to_ssd&quot;</span><span class="p">,</span> 
+    <span class="n">capacity</span><span class="o">=</span><span class="mi">40000000</span><span class="p">,</span>
+    <span class="n">size_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>              
+    <span class="n">physical_block_size</span><span class="o">=</span><span class="mi">512</span>
+<span class="p">)</span>
+</code></pre></div>
 <p>By calling <code>make_cached_ssd_store_options</code> here, you can store Embedding table on SSD and use GPU as cache. For the meaning of specific parameters, please refer to <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.make_cached_ssd_store_options.html">make_cached_ssd_store_options API 文档</a>.</p>
 <p>In addition, you can use pure GPU as storage; or use CPU memory to store Embedding table, but use GPU as cache. For more details, please refer to <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.make_device_mem_store_options.html">make_device_mem_store_options</a> and <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.make_cached_host_mem_store_options.html">make_cached_host_mem_store_option</a>.</p>
 <h3 id="instantiate-embedding">Instantiate Embedding<a class="headerlink" href="#instantiate-embedding" title="Permanent link">&para;</a></h3>
 <p>After the above configuration is completed, you can use <code>MultiTableEmbedding</code> to get the instantiated Embedding layer.</p>
-<p>```python
-embedding_size = 128
-embedding = flow.one_embedding.MultiTableEmbedding(
-    name="my_embedding",
-    embedding_dim=embedding_size,
-    dtype=flow.float,
-    key_type=flow.int64,
-    tables=tables,
-    store_options=store_options,
-)</p>
-<p>embedding.to("cuda")
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">embedding_size</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">one_embedding</span><span class="o">.</span><span class="n">MultiTableEmbedding</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_embedding&quot;</span><span class="p">,</span>
+    <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_size</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
+    <span class="n">key_type</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+    <span class="n">tables</span><span class="o">=</span><span class="n">tables</span><span class="p">,</span>
+    <span class="n">store_options</span><span class="o">=</span><span class="n">store_options</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">embedding</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</code></pre></div>
 <p>Among them, <code>tables</code> is the Embedding table attribute previously configured by <code>make_table_options</code>, <code>store_options</code> is the previously configured storage attribute, <code>embedding_dim</code> is the feature dimension, <code>dtype</code> is the data type of the feature vector, <code>key_type</code> is the data type of feature ID.</p>
 <p>If two OneEmbeddings are created at the same time, different name and persistent path parameters are needed to be set during instantiation. For more detailes, please refer to <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.MultiTableEmbedding.forward.html">one_embedding.MultiTableEmbedding</a>.</p>
 <h3 id="construct-graph-for-training">Construct Graph for Training<a class="headerlink" href="#construct-graph-for-training" title="Permanent link">&para;</a></h3>
 <p>Currently, OneEmbedding is only supported in Graph mode. </p>
 <p>In the following example, we construct a simple Graph class that includes <code>embedding</code> and <code>mlp</code> layers.</p>
-<p>```python
-num_tables = 3
-mlp = flow.nn.FusedMLP(
-    in_features=embedding_size * num_tables,
-    hidden_features=[512, 256, 128],
-    out_features=1,
-    skip_final_activation=True,
-)
-mlp.to("cuda")</p>
-<p>class TrainGraph(flow.nn.Graph):
-    def <strong>init</strong>(self,):
-        super().<strong>init</strong>()
-        self.embedding_lookup = embedding
-        self.mlp = mlp
-        self.add_optimizer(
-            flow.optim.SGD(self.embedding_lookup.parameters(), lr=0.1, momentum=0.0)
-        )
-        self.add_optimizer(
-            flow.optim.SGD(self.mlp.parameters(), lr=0.1, momentum=0.0)
-        )
-    def build(self, ids):
-        embedding = self.embedding_lookup(ids)
-        loss = self.mlp(flow.reshape(embedding, (-1, num_tables * embedding_size)))
-        loss = loss.sum()
-        loss.backward()
-        return loss
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">num_tables</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">mlp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">FusedMLP</span><span class="p">(</span>
+    <span class="n">in_features</span><span class="o">=</span><span class="n">embedding_size</span> <span class="o">*</span> <span class="n">num_tables</span><span class="p">,</span>
+    <span class="n">hidden_features</span><span class="o">=</span><span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">],</span>
+    <span class="n">out_features</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">skip_final_activation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">mlp</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">TrainGraph</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_lookup</span> <span class="o">=</span> <span class="n">embedding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">mlp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span>
+            <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_optimizer</span><span class="p">(</span>
+            <span class="n">flow</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+        <span class="n">embedding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_lookup</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_tables</span> <span class="o">*</span> <span class="n">embedding_size</span><span class="p">)))</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">loss</span>
+</code></pre></div>
 <p>Then you can instantiate the Graph and start training.</p>
-<p><code>python
-ids = np.random.randint(0, 1000, (100, num_tables), dtype=np.int64)
-ids_tensor = flow.tensor(ids, requires_grad=False).to("cuda")
-graph = TrainGraph()
-loss = graph(ids_tensor)
-print(loss)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">num_tables</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+<span class="n">ids_tensor</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">TrainGraph</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">graph</span><span class="p">(</span><span class="n">ids_tensor</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+</code></pre></div>
 <p>For the detailed information on using Graph, please refer to <a href="../basics/08_nn_graph.html">静态图模块 nn.Graph</a>. </p>
 <h2 id="the-features-of-oneembedding">The Features of OneEmbedding<a class="headerlink" href="#the-features-of-oneembedding" title="Permanent link">&para;</a></h2>
 <h3 id="feature-id-and-dynamic-insertion">Feature ID and Dynamic Insertion<a class="headerlink" href="#feature-id-and-dynamic-insertion" title="Permanent link">&para;</a></h3>
@@ -1118,20 +1160,18 @@ print(loss)</code></p>
 <p>If you use <code>MultiTableEmbedding</code> to configure more than one tables, then you need to specify in which to query for a feature ID with the following two methods:</p>
 <p>Method 1: Pass an <code>ids</code> of shape <code>(batch_size, number of Embedding table)</code>  for query, then the column of this <code>ids</code> corresponds to a Embedding table in turn.</p>
 <p>For example:
-```python
-ids = np.array([[488, 333, 220], [18, 568, 508]], dtype=np.int64)</p>
-<h1 id="this-means-to-query-488-18-in-the-zeroth-table-333-568-in-the-first-table-and-the-corresponding-feature-vector-of-220-508-in-the-second-table">This means to query <code>[[488], [18]]</code> in the zeroth table, <code>[[333], [568]]</code> in the first table, and the corresponding feature vector of <code>[[220], [508]]</code> in the second table.<a class="headerlink" href="#this-means-to-query-488-18-in-the-zeroth-table-333-568-in-the-first-table-and-the-corresponding-feature-vector-of-220-508-in-the-second-table" title="Permanent link">&para;</a></h1>
-<p>embedding_lookup(ids)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">488</span><span class="p">,</span> <span class="mi">333</span><span class="p">,</span> <span class="mi">220</span><span class="p">],</span> <span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">568</span><span class="p">,</span> <span class="mi">508</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+<span class="c1"># This means to query `[[488], [18]]` in the zeroth table, `[[333], [568]]` in the first table, and the corresponding feature vector of `[[220], [508]]` in the second table.</span>
+<span class="n">embedding_lookup</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+</code></pre></div></p>
 <p>Method 2:When passing the <code>ids</code> parameter, pass a <code>table_ids</code> parameter, which has the exact same shape as <code>ids</code>, and specifies the ordinal number of the table in <code>table_ids</code>.</p>
 <p>For example:
-```python
-ids = np.array([488, 333, 220, 18, 568, 508], dtype=np.int64)</p>
-<h1 id="table_ids-has-the-exact-same-shape-as-ids">table_ids has the exact same shape as <code>ids</code><a class="headerlink" href="#table_ids-has-the-exact-same-shape-as-ids" title="Permanent link">&para;</a></h1>
-<p>table_ids = np.array([0, 1, 2, 0, 1, 2])</p>
-<h1 id="this-means-to-query-488-18-in-the-zeroth-table-333-568-in-the-first-table-and-the-corresponding-feature-vector-of-220-508-in-the-second-table_1">This means to query <code>488, 18</code> in the zeroth table, <code>333, 568</code> in the first table, and the corresponding feature vector of <code>220, 508</code> in the second table.<a class="headerlink" href="#this-means-to-query-488-18-in-the-zeroth-table-333-568-in-the-first-table-and-the-corresponding-feature-vector-of-220-508-in-the-second-table_1" title="Permanent link">&para;</a></h1>
-<p>embedding_lookup(ids, table_ids)
-```
+<div class="highlight"><pre><span></span><code><span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">488</span><span class="p">,</span> <span class="mi">333</span><span class="p">,</span> <span class="mi">220</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">568</span><span class="p">,</span> <span class="mi">508</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+<span class="c1"># table_ids has the exact same shape as `ids`</span>
+<span class="n">table_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="c1"># This means to query `488, 18` in the zeroth table, `333, 568` in the first table, and the corresponding feature vector of `220, 508` in the second table.</span>
+<span class="n">embedding_lookup</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">table_ids</span><span class="p">)</span>
+</code></pre></div>
 For more details, please refer to  <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.one_embedding.MultiTableEmbedding.forward.html">MultiTableEmbedding.forward</a>.</p>
 <h3 id="how-to-choose-the-proper-storage-configuration">How to Choose the Proper Storage Configuration<a class="headerlink" href="#how-to-choose-the-proper-storage-configuration" title="Permanent link">&para;</a></h3>
 <p>OneEmbedding provides three storage options configurations,they are pure GPU storage, use CPU memory to store and GPU memory as cache and use SSD to store and GPU memory as cache.</p>
