@@ -1059,14 +1059,14 @@
 <p><strong>Click</strong> the Terminal 0 or Terminal 1 label to check the commands/code</p>
 </div>
 <div class="tabbed-set" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><label for="__tabbed_1_1">Terminal 0</label><div class="tabbed-content">
-<p><code>shell
-export MASTER_ADDR=127.0.0.1 MASTER_PORT=17789 WORLD_SIZE=2 RANK=0 LOCAL_RANK=0
-python3</code></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">MASTER_ADDR</span><span class="o">=</span><span class="m">127</span>.0.0.1 <span class="nv">MASTER_PORT</span><span class="o">=</span><span class="m">17789</span> <span class="nv">WORLD_SIZE</span><span class="o">=</span><span class="m">2</span> <span class="nv">RANK</span><span class="o">=</span><span class="m">0</span> <span class="nv">LOCAL_RANK</span><span class="o">=</span><span class="m">0</span>
+python3
+</code></pre></div>
 </div>
 <input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><label for="__tabbed_1_2">Terminal 1</label><div class="tabbed-content">
-<p><code>shell
-export MASTER_ADDR=127.0.0.1 MASTER_PORT=17789 WORLD_SIZE=2 RANK=1 LOCAL_RANK=1
-python3</code></p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">MASTER_ADDR</span><span class="o">=</span><span class="m">127</span>.0.0.1 <span class="nv">MASTER_PORT</span><span class="o">=</span><span class="m">17789</span> <span class="nv">WORLD_SIZE</span><span class="o">=</span><span class="m">2</span> <span class="nv">RANK</span><span class="o">=</span><span class="m">1</span> <span class="nv">LOCAL_RANK</span><span class="o">=</span><span class="m">1</span>
+python3
+</code></pre></div>
 </div>
 </div>
 <p>Setting environment variables prepares the machines for distributed computing. Please refer to the <a href="#extended-reading">Extended Reading</a> section at the end of this article for a detailed explanation and ways to launch distributed computing using provided tools.</p>
@@ -1078,49 +1078,49 @@ python3</code></p>
 <li>The second parameter of <code>placement</code> is a dictionary. Its <code>key</code> is the index of machine, and its <code>value</code> is the index of the graphic cards. Therefore, <code>{0:[0,1]}</code> means that the global tensor is on the 0<sup>th</sup>, 1<sup>st</sup> graphic cards of the 0<sup>th</sup> machine.</li>
 </ul>
 <div class="tabbed-set" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><label for="__tabbed_2_1">Terminal 0</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow</p>
-<p>placement = flow.placement("cuda", [0,1])
-sbp = flow.sbp.split(0)
-x = flow.randn(4,5,placement=placement, sbp=sbp)
-x.shape
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">sbp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
 </div>
 <input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><label for="__tabbed_2_2">Terminal 1</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow</p>
-<p>placement = flow.placement("cuda", [0,1])
-sbp = flow.sbp.split(0)
-x = flow.randn(4,5,placement=placement, sbp=sbp)
-x.shape
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">sbp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+<span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
 </div>
 </div>
 <p>Output:</p>
 <div class="tabbed-set" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><label for="__tabbed_3_1">Terminal 0</label><div class="tabbed-content">
-<p><code>text
-flow.Size([4, 5])</code></p>
+<div class="highlight"><pre><span></span><code>flow.Size([4, 5])
+</code></pre></div>
 </div>
 <input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><label for="__tabbed_3_2">Terminal 1</label><div class="tabbed-content">
-<p><code>text
-flow.Size([4, 5])</code></p>
+<div class="highlight"><pre><span></span><code>flow.Size([4, 5])
+</code></pre></div>
 </div>
 </div>
 <h3 id="get-local-tensor-from-global-tensor">Get Local Tensor from Global Tensor<a class="headerlink" href="#get-local-tensor-from-global-tensor" title="Permanent link">&para;</a></h3>
 <p>Call <a href="https://oneflow.readthedocs.io/en/v0.8.1/generated/oneflow.Tensor.to_local.html">to_local</a> to check the local tensor on a device.</p>
 <div class="tabbed-set" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><label for="__tabbed_4_1">Terminal 0</label><div class="tabbed-content">
-<p><code>python
-x.to_local()
-tensor([[ 2.9186e-01, -3.9442e-01,  4.7072e-04, -3.2216e-01,  1.7788e-01],
-        [-4.5284e-01,  1.2361e-01, -3.5962e-01,  2.6651e-01,  1.2951e+00]],
-    device='cuda:0', dtype=oneflow.float32)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x</span><span class="o">.</span><span class="n">to_local</span><span class="p">()</span>
+<span class="n">tensor</span><span class="p">([[</span> <span class="mf">2.9186e-01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.9442e-01</span><span class="p">,</span>  <span class="mf">4.7072e-04</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.2216e-01</span><span class="p">,</span>  <span class="mf">1.7788e-01</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mf">4.5284e-01</span><span class="p">,</span>  <span class="mf">1.2361e-01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.5962e-01</span><span class="p">,</span>  <span class="mf">2.6651e-01</span><span class="p">,</span>  <span class="mf">1.2951e+00</span><span class="p">]],</span>
+    <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cuda:0&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">oneflow</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</code></pre></div>
 </div>
 <input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><label for="__tabbed_4_2">Terminal 1</label><div class="tabbed-content">
-<p><code>python
-x.to_local()
-tensor([[-0.4363,  0.9985, -2.5387,  0.3003,  0.3803],
-        [ 0.0556, -0.8077,  1.1191, -2.1278,  0.1468]], device='cuda:1',
-    dtype=oneflow.float32)</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">x</span><span class="o">.</span><span class="n">to_local</span><span class="p">()</span>
+<span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.4363</span><span class="p">,</span>  <span class="mf">0.9985</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5387</span><span class="p">,</span>  <span class="mf">0.3003</span><span class="p">,</span>  <span class="mf">0.3803</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">0.0556</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.8077</span><span class="p">,</span>  <span class="mf">1.1191</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.1278</span><span class="p">,</span>  <span class="mf">0.1468</span><span class="p">]],</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cuda:1&#39;</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="n">oneflow</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</code></pre></div>
 </div>
 </div>
 <h3 id="convert-local-tensor-to-global-tensor">Convert Local Tensor to Global Tensor<a class="headerlink" href="#convert-local-tensor-to-global-tensor" title="Permanent link">&para;</a></h3>
@@ -1128,24 +1128,24 @@ tensor([[-0.4363,  0.9985, -2.5387,  0.3003,  0.3803],
 <p>Two local tensors with the shape of <code>(2,5)</code> are created separately on two devices. While after the <code>to_global</code> method, the global tensor with a shape of <code>(4,5)</code> is obtained.</p>
 <p>The reason for this transformation lies in that by setting the sbp with <code>sbp=flow.sbp.split(0)</code>, the two local tensors with the shape of <code>(2, 5)</code> are concatenated on the 0<sup>th</sup> dimension.</p>
 <div class="tabbed-set" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><label for="__tabbed_5_1">Terminal 0</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow</p>
-<p>x = flow.randn(2,5)
-placement = flow.placement("cuda", [0,1])
-sbp = flow.sbp.split(0)
-x_global = x.to_global(placement=placement, sbp=sbp)
-x_global.shape
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">sbp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x_global</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+<span class="n">x_global</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
 </div>
 <input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><label for="__tabbed_5_2">Terminal 1</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow</p>
-<p>x = flow.randn(2,5)
-placement = flow.placement("cuda", [0,1])
-sbp = flow.sbp.split(0)
-x_global = x.to_global(placement=placement, sbp=sbp)
-x_global.shape
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">sbp</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x_global</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to_global</span><span class="p">(</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">sbp</span><span class="p">)</span>
+<span class="n">x_global</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
 </div>
 </div>
 <h2 id="practice-with-sbp-signature">Practice with SBP Signature<a class="headerlink" href="#practice-with-sbp-signature" title="Permanent link">&para;</a></h2>
@@ -1153,76 +1153,76 @@ x_global.shape
 <p>The following code is an example of data parallelism of <a href="01_introduction.html#_4">common distributed strategy</a></p>
 <p><img alt="data parallelism" src="imgs/matmul_data_paralelism.png" /></p>
 <div class="tabbed-set" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><label for="__tabbed_6_1">Terminal 0</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow</p>
-<p>placement = flow.placement("cuda", [0,1])
-x = flow.randn(4,5,placement=placement, sbp=flow.sbp.split(0))
-w = flow.randn(5,8,placement=placement, sbp=flow.sbp.broadcast)
-y = flow.matmul(x,w)
-y.sbp
-y.shape
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+<span class="n">y</span><span class="o">.</span><span class="n">sbp</span>
+<span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
 </div>
 <input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><label for="__tabbed_6_2">Terminal 1</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow</p>
-<p>placement = flow.placement("cuda", [0,1])
-x = flow.randn(4,5,placement=placement, sbp=flow.sbp.split(0))
-w = flow.randn(5,8,placement=placement, sbp=flow.sbp.broadcast)
-y = flow.matmul(x,w)
-y.sbp
-y.shape
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+<span class="n">y</span><span class="o">.</span><span class="n">sbp</span>
+<span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
 </div>
 </div>
 <p><code>flow.matmul</code> supports many SBP signatures of inputs. When the SBP of <code>x</code> and <code>w</code> are <code>split(0)</code> and <code>broadcast</code> respectively, the SBP of output <code>y</code> is <code>split(0)</code> with logical shape of <code>(4, 8)</code>. Output:</p>
 <div class="tabbed-set" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><label for="__tabbed_7_1">Terminal 0</label><div class="tabbed-content">
-<p><code>text
-(oneflow.sbp.split(dim=0),)
-flow.Size([4, 8])</code></p>
+<div class="highlight"><pre><span></span><code>(oneflow.sbp.split(dim=0),)
+flow.Size([4, 8])
+</code></pre></div>
 </div>
 <input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><label for="__tabbed_7_2">Terminal 1</label><div class="tabbed-content">
-<p><code>text
-(oneflow.sbp.split(dim=0),)
-flow.Size([4, 8])</code></p>
+<div class="highlight"><pre><span></span><code>(oneflow.sbp.split(dim=0),)
+flow.Size([4, 8])
+</code></pre></div>
 </div>
 </div>
 <h3 id="model-parallelism">Model Parallelism<a class="headerlink" href="#model-parallelism" title="Permanent link">&para;</a></h3>
 <p>The following code is an example of model parallelism of <a href="01_introduction.html#_5">common distributed strategy</a>.</p>
 <p><img alt="data parallelism" src="imgs/matmul_model_paralelism.png" /></p>
 <div class="tabbed-set" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><label for="__tabbed_8_1">Terminal 0</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow</p>
-<p>placement = flow.placement("cuda", [0,1])
-x = flow.randn(4,5,placement=placement, sbp=flow.sbp.broadcast)
-w = flow.randn(5,8,placement=placement, sbp=flow.sbp.split(1))
-y = flow.matmul(x,w)
-y.sbp
-y.shape
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+<span class="n">y</span><span class="o">.</span><span class="n">sbp</span>
+<span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
 </div>
 <input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><label for="__tabbed_8_2">Terminal 1</label><div class="tabbed-content">
-<p>```python
-import oneflow as flow</p>
-<p>placement = flow.placement("cuda", [0,1])
-x = flow.randn(4,5,placement=placement, sbp=flow.sbp.broadcast)
-w = flow.randn(5,8,placement=placement, sbp=flow.sbp.split(1))
-y = flow.matmul(x,w)
-y.sbp
-y.shape
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+
+<span class="n">placement</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">placement</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">broadcast</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="n">placement</span><span class="o">=</span><span class="n">placement</span><span class="p">,</span> <span class="n">sbp</span><span class="o">=</span><span class="n">flow</span><span class="o">.</span><span class="n">sbp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
+<span class="n">y</span><span class="o">.</span><span class="n">sbp</span>
+<span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+</code></pre></div>
 </div>
 </div>
 <p><code>flow.matmul</code> supports many SBP signatures of inputs. When the SBP of <code>x</code> and <code>w</code> are <code>broadcast</code> and <code>split(0)</code> respectively, the SBP of output <code>y</code> is <code>split(1)</code> with logical shape of <code>(4, 8)</code>. Output:</p>
 <div class="tabbed-set" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><label for="__tabbed_9_1">Terminal 0</label><div class="tabbed-content">
-<p><code>text
-(oneflow.sbp.split(axis=1),)
-flow.Size([4, 8])</code></p>
+<div class="highlight"><pre><span></span><code>(oneflow.sbp.split(axis=1),)
+flow.Size([4, 8])
+</code></pre></div>
 </div>
 <input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><label for="__tabbed_9_2">Terminal 1</label><div class="tabbed-content">
-<p><code>text
-(oneflow.sbp.split(axis=1),)
-flow.Size([4, 8])</code></p>
+<div class="highlight"><pre><span></span><code>(oneflow.sbp.split(axis=1),)
+flow.Size([4, 8])
+</code></pre></div>
 </div>
 </div>
 <h2 id="extended-reading">Extended Reading<a class="headerlink" href="#extended-reading" title="Permanent link">&para;</a></h2>

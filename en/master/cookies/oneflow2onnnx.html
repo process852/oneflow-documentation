@@ -735,6 +735,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#inference-with-onnx-models" class="md-nav__link">
+    Inference with ONNX models
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -986,6 +993,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#inference-with-onnx-models" class="md-nav__link">
+    Inference with ONNX models
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1032,19 +1046,19 @@
 <p><a href="https://github.com/Oneflow-Inc/oneflow_convert">oneflow-onnx</a> is a model conversion tool provided by OneFlow team to support exporting OneFlow static graph models to ONNX models. At present oneflow-onnx supports more than 80 kinds of OneFlow OPs exported as ONNX OPs. For detalis, refer to <a href="https://github.com/Oneflow-Inc/oneflow_convert/blob/main/docs/oneflow2onnx/op_list.md">list of OP supported by OneFlow2ONNX</a>。</p>
 <h3 id="install-oneflow-onnx">Install oneflow-onnx<a class="headerlink" href="#install-oneflow-onnx" title="Permanent link">&para;</a></h3>
 <p>oneflow-onnx is independent of OneFlow and needs to be installed separately via pip:</p>
-<p><code>bash
-pip install oneflow-onnx</code></p>
+<div class="highlight"><pre><span></span><code>pip install oneflow-onnx
+</code></pre></div>
 <h3 id="how-to-use-oneflow-onnx">How to Use oneflow-onnx<a class="headerlink" href="#how-to-use-oneflow-onnx" title="Permanent link">&para;</a></h3>
 <p>To export OneFlow static graph model as ONNX model, just call <code>export_ onnx_ Model</code> function.</p>
-<p>```python
-from oneflow_onnx.oneflow2onnx.util import export_onnx_model</p>
-<p>export_onnx_model(graph,
-                  external_data=False, 
-                  opset=None, 
-                  flow_weight_dir=None, 
-                  onnx_model_path="/tmp", 
-                  dynamic_batch_size=False)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">oneflow_onnx.oneflow2onnx.util</span> <span class="kn">import</span> <span class="n">export_onnx_model</span>
+
+<span class="n">export_onnx_model</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span>
+                  <span class="n">external_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                  <span class="n">opset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                  <span class="n">flow_weight_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                  <span class="n">onnx_model_path</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span><span class="p">,</span> 
+                  <span class="n">dynamic_batch_size</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 <p>The meaning of each parameter is as follows:</p>
 <ol>
 <li>
@@ -1067,10 +1081,10 @@ from oneflow_onnx.oneflow2onnx.util import export_onnx_model</p>
 </li>
 </ol>
 <p>In addition, oneflow-onnx provides a function called <code>convert_to_onnx_and_check</code> to convert and meanwhile check the converted ONNX model. The check process will pass the same input to the original OneFlow model and the converted ONNX model respectively, and then compare the difference between each value in the two outputs to see if they are same within a relative range.</p>
-<p>```python
-from oneflow_onnx.oneflow2onnx.util import convert_to_onnx_and_check</p>
-<p>convert_to_onnx_and_check(...)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">oneflow_onnx.oneflow2onnx.util</span> <span class="kn">import</span> <span class="n">convert_to_onnx_and_check</span>
+
+<span class="n">convert_to_onnx_and_check</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div>
 <p>The parameters of the <code>convert_to_onnx_and_check</code> are almost the same as those of <code>export_onnx_model</code>, besides you can pass <code>print_outlier</code> parameter additionally. When <code>print_outlier=True</code>, it will output any abnormal values found during the check process that exceed the reasonable error range. </p>
 <h3 id="considerations-when-exporting-models">Considerations when Exporting Models<a class="headerlink" href="#considerations-when-exporting-models" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1084,45 +1098,46 @@ from oneflow_onnx.oneflow2onnx.util import convert_to_onnx_and_check</p>
 <p>The following code uses <a href="https://github.com/Oneflow-Inc/vision">FlowVision</a>, a library built on OneFlow for computer vision tasks, which contains many models, data enhancement methods, data transformation operations, datasets, and so on. Here we directly use the ResNet-34 model provided by the FlowVision library and use its weight trained on the ImageNet dataset. </p>
 <h3 id="export-as-onnx-model">Export as ONNX Model<a class="headerlink" href="#export-as-onnx-model" title="Permanent link">&para;</a></h3>
 <p>Import related dependencies and the saved resnet34 model will be used later:</p>
-<p>```python
-import oneflow as flow
-from oneflow import nn
-from flowvision.models import resnet34
-from oneflow_onnx.oneflow2onnx.util import convert_to_onnx_and_check</p>
-<h1 id="model-parameter-storage-directory">Model parameter storage directory<a class="headerlink" href="#model-parameter-storage-directory" title="Permanent link">&para;</a></h1>
-<p>MODEL_PARAMS = 'checkpoints/resnet34'</p>
-<h1 id="load-save-pretrained-model">Load &amp; save pretrained model<a class="headerlink" href="#load-save-pretrained-model" title="Permanent link">&para;</a></h1>
-<p>model = resnet34(pretrained=True)
-flow.save(model.state_dict(), MODEL_PARAMS)
-```</p>
-<p>To build a static graph model using a dynamic graph model. For details, refer to: <a href="../basics/08_nn_graph.html">Static Graph Interface: nn.Graph</a></p>
-<p>```python
-class ResNet34Graph(nn.Graph):
-    def <strong>init</strong>(self, eager_model):
-        super().<strong>init</strong>()
-        self.model = eager_model</p>
-<div class="codehilite"><pre><span></span><code>def build(self, x):
-    return self.model(x)
-</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">oneflow</span> <span class="k">as</span> <span class="nn">flow</span>
+<span class="kn">from</span> <span class="nn">oneflow</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">flowvision.models</span> <span class="kn">import</span> <span class="n">resnet34</span>
+<span class="kn">from</span> <span class="nn">oneflow_onnx.oneflow2onnx.util</span> <span class="kn">import</span> <span class="n">convert_to_onnx_and_check</span>
 
-<p>```</p>
+<span class="c1"># Model parameter storage directory</span>
+<span class="n">MODEL_PARAMS</span> <span class="o">=</span> <span class="s1">&#39;checkpoints/resnet34&#39;</span>
+
+<span class="c1"># Load &amp; save pretrained model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">resnet34</span><span class="p">(</span><span class="n">pretrained</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">flow</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">MODEL_PARAMS</span><span class="p">)</span>
+</code></pre></div>
+<p>To build a static graph model using a dynamic graph model. For details, refer to: <a href="../basics/08_nn_graph.html">Static Graph Interface: nn.Graph</a></p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ResNet34Graph</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Graph</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eager_model</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">eager_model</span>
+
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div>
 <p>Export OneFlow static graph models to ONNX models:</p>
-<p>```python
-params = flow.load(MODEL_PARAMS)
-model = resnet34()
-model.load_state_dict(params)</p>
-<h1 id="set-the-model-to-eval-mode">Set the model to eval mode<a class="headerlink" href="#set-the-model-to-eval-mode" title="Permanent link">&para;</a></h1>
-<p>model.eval()</p>
-<p>resnet34_graph = ResNet34Graph(model)</p>
-<h1 id="build-the-static-graph-model">Build the static graph model<a class="headerlink" href="#build-the-static-graph-model" title="Permanent link">&para;</a></h1>
-<p>resnet34_graph._compile(flow.randn(1, 3, 224, 224))</p>
-<h1 id="export-as-onnx-model-and-check">Export as ONNX model and check<a class="headerlink" href="#export-as-onnx-model-and-check" title="Permanent link">&para;</a></h1>
-<p>convert_to_onnx_and_check(resnet34_graph, 
-                          flow_weight_dir=MODEL_PARAMS, 
-                          onnx_model_path="./", 
-                          print_outlier=True,
-                          dynamic_batch_size=True)
-```</p>
+<div class="highlight"><pre><span></span><code><span class="n">params</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">MODEL_PARAMS</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">resnet34</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+<span class="c1"># Set the model to eval mode</span>
+<span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+<span class="n">resnet34_graph</span> <span class="o">=</span> <span class="n">ResNet34Graph</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="c1"># Build the static graph model</span>
+<span class="n">resnet34_graph</span><span class="o">.</span><span class="n">_compile</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">))</span>
+
+<span class="c1"># Export as ONNX model and check</span>
+<span class="n">convert_to_onnx_and_check</span><span class="p">(</span><span class="n">resnet34_graph</span><span class="p">,</span> 
+                          <span class="n">flow_weight_dir</span><span class="o">=</span><span class="n">MODEL_PARAMS</span><span class="p">,</span> 
+                          <span class="n">onnx_model_path</span><span class="o">=</span><span class="s2">&quot;./&quot;</span><span class="p">,</span> 
+                          <span class="n">print_outlier</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                          <span class="n">dynamic_batch_size</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 <p>After running,  a file named <code>model.onnx</code> is  in the current directory, which is the exported ONNX model.</p>
 <h3 id="inference-with-onnx-models">Inference with ONNX models<a class="headerlink" href="#inference-with-onnx-models" title="Permanent link">&para;</a></h3>
 <p>Before performing inference, ensure that the ONNX Runtime is installed, that is onnxruntime or onnxruntime-gpu. In the experimental environment of this tutorial, onnxruntime-gpu is installed to invoke the GPU for computation, but if there is no GPU on the machine, you can specify the CPU for calculation. See below for details.</p>
@@ -1132,59 +1147,59 @@ model.load_state_dict(params)</p>
 </div>
 
 <p>Import related dependencies:</p>
-<p><code>python
-import numpy as np
-import cv2
-from onnxruntime import InferenceSession</code></p>
-<p>Define a function to pre-process the image to a format and size accepted by the ONNX model:</p>
-<p>```python
-def preprocess_image(img, input_hw = (224, 224)):
-    h, w, _ = img.shape</p>
-<div class="codehilite"><pre><span></span><code># Use the longer side of the image to determine the scaling factor
-is_wider = True if h &lt;= w else False
-scale = input_hw[1] / w if is_wider else input_hw[0] / h
-
-# Scale the image equally
-processed_img = cv2.resize(img, (0, 0), fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
-# Normalization
-processed_img = np.array(processed_img, dtype=np.float32) / 255
-
-# Fill images to ONNX model and preset sizes
-temp_img = np.zeros((input_hw[0], input_hw[1], 3), dtype=np.float32)
-temp_img[:processed_img.shape[0], :processed_img.shape[1], :] = processed_img
-processed_img = temp_img
-
-# Adjust the order of axes and add batch axes at the front 
-processed_img = np.expand_dims(processed_img.transpose(2, 0, 1), axis=0)
-
-return processed_img
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">from</span> <span class="nn">onnxruntime</span> <span class="kn">import</span> <span class="n">InferenceSession</span>
 </code></pre></div>
+<p>Define a function to pre-process the image to a format and size accepted by the ONNX model:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">preprocess_image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">input_hw</span> <span class="o">=</span> <span class="p">(</span><span class="mi">224</span><span class="p">,</span> <span class="mi">224</span><span class="p">)):</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span>
 
-<p>```</p>
+    <span class="c1"># Use the longer side of the image to determine the scaling factor</span>
+    <span class="n">is_wider</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">h</span> <span class="o">&lt;=</span> <span class="n">w</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">input_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">w</span> <span class="k">if</span> <span class="n">is_wider</span> <span class="k">else</span> <span class="n">input_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">h</span>
+
+    <span class="c1"># Scale the image equally</span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">fx</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">fy</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">INTER_LINEAR</span><span class="p">)</span>
+    <span class="c1"># Normalization</span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">processed_img</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">/</span> <span class="mi">255</span>
+
+    <span class="c1"># Fill images to ONNX model and preset sizes</span>
+    <span class="n">temp_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">input_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">input_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">temp_img</span><span class="p">[:</span><span class="n">processed_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="n">processed_img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">processed_img</span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">temp_img</span>
+
+    <span class="c1"># Adjust the order of axes and add batch axes at the front </span>
+    <span class="n">processed_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">processed_img</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">processed_img</span>
+</code></pre></div>
 <p>The next step is to use the ONNX model for inference, which consists of creating an InferenceSession object and calling <code>run</code> to perform inference.</p>
 <p>In onnxruntime(-gpu) 1.9 and above, the <code>providers</code> parameter needs to be explicitly specified when creating an InferenceSession object to select the hardware to use. For onnxruntime-gpu, the values that can be specified include <code>TensorrtExecutionProvider</code>, <code>CUDAExecutionProvider</code>, and <code>CPUExecutionProvider</code>. If there is no GPU on the running machine, you can specify the <code>providers</code> parameter as <code>['CPUExecutionProvider']</code> to use the CPU for computation.</p>
 <p>The type of input data of an ONNX model is a dict. Its keys are <code>input names</code> when exporting the ONNX model, and the values are the actual input data of NumPy array type. You can get "input names" through the <code>get_inputs</code> method of the InferenceSession object, which returns a list of objects of <code>onnxruntime.NodeArg</code> type. For NodeArg object, you can use its <code>name</code> property to get a name of str type. In this tutorial, the input is only the image data, so you can get the "input names" corresponding to the input by calling <code>.get_inputs()[0].name</code> on the InferenceSession object. The value is <code>_ResNet34Graph_0-input_0/out</code>, which is used as the key to construct the dict of the ONNX model input. Of course, it can also be obtained dynamically at runtime without specifying it in advance.</p>
-<p>```python</p>
-<h1 id="read-the-category-name-of-the-imagenet-dataset-from-the-file">Read the category name of the ImageNet dataset from the file<a class="headerlink" href="#read-the-category-name-of-the-imagenet-dataset-from-the-file" title="Permanent link">&para;</a></h1>
-<p>with open('ImageNet-Class-Names.txt') as f:
-    CLASS_NAMES = f.readlines()</p>
-<h1 id="read-the-image-file-and-preprocess-it-with-the-preprocess_image-function">Read the image file and preprocess it with the <code>preprocess_image</code> function<a class="headerlink" href="#read-the-image-file-and-preprocess-it-with-the-preprocess_image-function" title="Permanent link">&para;</a></h1>
-<p>img = cv2.imread('cat.jpg', cv2.IMREAD_COLOR)
-img = preprocess_image(img)</p>
-<h1 id="create-an-inferencesession-object">Create an InferenceSession object<a class="headerlink" href="#create-an-inferencesession-object" title="Permanent link">&para;</a></h1>
-<p>ort_sess = InferenceSession('model.onnx', providers=['TensorrtExecutionProvider',
-                                                     'CUDAExecutionProvider',
-                                                     'CPUExecutionProvider'])</p>
-<h1 id="call-the-run-method-of-the-inferencesession-object-to-perform-inference">Call the <code>run</code> method of the InferenceSession object to perform inference<a class="headerlink" href="#call-the-run-method-of-the-inferencesession-object-to-perform-inference" title="Permanent link">&para;</a></h1>
-<p>results = ort_sess.run(None, {"_ResNet34Graph_0-input_0/out": img})</p>
-<h1 id="output-inference-results">Output inference results<a class="headerlink" href="#output-inference-results" title="Permanent link">&para;</a></h1>
-<p>print(CLASS_NAMES[np.argmax(results[0])])
-```</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Read the category name of the ImageNet dataset from the file</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;ImageNet-Class-Names.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">CLASS_NAMES</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+<span class="c1"># Read the image file and preprocess it with the `preprocess_image` function</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s1">&#39;cat.jpg&#39;</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">IMREAD_COLOR</span><span class="p">)</span>
+<span class="n">img</span> <span class="o">=</span> <span class="n">preprocess_image</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+
+<span class="c1"># Create an InferenceSession object</span>
+<span class="n">ort_sess</span> <span class="o">=</span> <span class="n">InferenceSession</span><span class="p">(</span><span class="s1">&#39;model.onnx&#39;</span><span class="p">,</span> <span class="n">providers</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;TensorrtExecutionProvider&#39;</span><span class="p">,</span>
+                                                     <span class="s1">&#39;CUDAExecutionProvider&#39;</span><span class="p">,</span>
+                                                     <span class="s1">&#39;CPUExecutionProvider&#39;</span><span class="p">])</span>
+<span class="c1"># Call the `run` method of the InferenceSession object to perform inference</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">ort_sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;_ResNet34Graph_0-input_0/out&quot;</span><span class="p">:</span> <span class="n">img</span><span class="p">})</span>
+
+<span class="c1"># Output inference results</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">CLASS_NAMES</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+</code></pre></div>
 <p>The output of the <code>run</code> method of the InferenceSession object is a list of NumPy arrays, and each NumPy array corresponds to a set of outputs. Since there is only one set of inputs, the element with index 0 is the output, and the shape of it is <code>(1, 1000)</code>, which corresponds to the probability of 1000 categories (if n images are input as a batch, the shape of them will be <code>(n, 1000)</code>). After obtaining the index corresponding to the category with the highest probability via <code>np.argmax</code>, the index is mapped to the category name.</p>
 <p>Run the code and get the result:</p>
-<p><code>text
-(base) root@training-notebook-654c6f-654c6f-jupyter-master-0:/workspace# python infer.py 
-285: 'Egyptian cat',</code></p>
+<div class="highlight"><pre><span></span><code>(base) root@training-notebook-654c6f-654c6f-jupyter-master-0:/workspace# python infer.py 
+285: &#39;Egyptian cat&#39;,
+</code></pre></div>
 <p>The above inference is done in a Python environment using GPU or CPU. In practice, you can use the exported ONNX model with a different ONNX Runtime depending on the deployment environment.</p>
                 
               
